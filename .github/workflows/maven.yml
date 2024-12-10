@@ -29,22 +29,14 @@ jobs:
           java-version: 17
           distribution: 'temurin'
           cache: 'maven'
-          server-id: ossrh
-          server-username: SONATYPE_USERNAME
-          server-password: SONATYPE_PASSWORD
-          gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
-          gpg-passphrase: GPG_SECRET_KEY_PASSPHRASE
+          server-id: beng-nexus
       - name: Build and deploy with Maven
         run: |
           (cd src/main/java; mv module-info.java module-info.java.not)
           mvn generate-sources -Ddelombok.skip=false
           (cd src/main/java; mv module-info.java.not module-info.java)
           cp -f src/main/java/module-info.java target/delombok
-          mvn -Pdeploy -B test deploy
-        env:
-          SONATYPE_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          SONATYPE_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-          GPG_SECRET_KEY_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
+          mvn -Pdeploy -B test install
       - uses: codecov/codecov-action@v5
         with:
           files: target/site/jacoco/jacoco.xml
@@ -56,6 +48,5 @@ jobs:
         if: always()
         with:
           files: "target/surefire-reports/*.xml"
-
 
 
