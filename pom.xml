@@ -72,7 +72,7 @@
     <dependency>
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-log4j2</artifactId>
-      <version>5.3.3</version>
+      <version>5.3.4</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -110,7 +110,7 @@
     <dependency>
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-xml</artifactId>
-      <version>5.3.3</version>
+      <version>5.3.4</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
