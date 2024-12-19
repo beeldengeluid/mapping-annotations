@@ -1,5 +1,5 @@
 /**
- * See {@link org.meeuw.mapping.Mapper}
+ * See {@link Mapper}
  */
 module org.meeuw.mapping.annotations {
     requires static lombok;
@@ -10,6 +10,6 @@ module org.meeuw.mapping.annotations {
     requires transitive jakarta.xml.bind;
     requires org.meeuw.functional;
 
-    exports org.meeuw.mapping.annotations;
-    exports org.meeuw.mapping;
+    exports nl.beeldengeluid.mapping.annotations;
+    exports nl.beeldengeluid.mapping;
 }
