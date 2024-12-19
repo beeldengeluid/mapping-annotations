@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -220,6 +221,28 @@ class MapperTest {
         Destination destination = MAPPER.map(sourceObject, Destination.class);
         assertThat(destination.localDate()).isEqualTo("2024-12-09");
 
+    }
+
+    @Test
+    void customMappingDuration() {
+
+
+        Mapper mapper = MAPPER.withValueMappers(List.of((clazz, field, value) -> {
+            return ValueMapper.NOT_MAPPED;
+            })
+        );
+
+        SourceObject sourceObject = new SourceObject();
+        sourceObject.json("""
+            { sub: {
+                title: "foo",
+                description: "bar"
+                }
+            }
+            """.getBytes(StandardCharsets.UTF_8));
+
+        Destination destination = mapper.map(sourceObject, Destination.class);
+        assertThat(destination.sub().a()).isEqualTo("foo/bar");
     }
 
 

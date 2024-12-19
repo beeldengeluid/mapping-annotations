@@ -7,13 +7,13 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.*;
 
-import nl.beeldengeluid.mapping.impl.EffectiveSource;
-import nl.beeldengeluid.mapping.impl.JsonUtil;
-import nl.beeldengeluid.mapping.impl.ValueMapper;
+import nl.beeldengeluid.mapping.impl.*;
+
 import org.meeuw.functional.Functions;
 import nl.beeldengeluid.mapping.annotations.Source;
 
@@ -34,7 +34,7 @@ import static nl.beeldengeluid.mapping.impl.Util.*;
  */
 @Slf4j
 @AllArgsConstructor
-@lombok.Builder
+@lombok.Builder(buildMethodName = "build")
 public class Mapper {
 
     /**
@@ -47,6 +47,9 @@ public class Mapper {
      */
     private static final ThreadLocal<Mapper> CURRENT = ThreadLocal.withInitial(() -> MAPPER);
 
+    /**
+     * @return  The currently in use (thread local) {@link Mapper} instance
+     */
     public static Mapper current() {
         return CURRENT.get();
     }
@@ -55,15 +58,20 @@ public class Mapper {
     @Getter
     private final boolean clearsJsonCacheEveryTime;
 
-    @With
-    @lombok.Builder.Default
-    @Getter
-    private final boolean supportsJaxbAnnotations = true;
-
+    /**
+     * Custom mappers Destination Class -> Function
+     *
+     */
     @With(AccessLevel.PACKAGE)
     @lombok.Builder.Default
     @Getter
     private final Map<Class<?>, List<BiFunction<Object, Field, Optional<Object>>>> customMappers = Collections.emptyMap();
+
+
+    @With(AccessLevel.PACKAGE)
+    @lombok.Builder.Default
+    @Getter
+    private final List<ValueMapper> valueMappers = List.of(JaxbValueMapper.INSTANCE, new EnumValueMapper(true));
 
 
     /**
@@ -207,6 +215,29 @@ public class Mapper {
     }
 
 
+    public Mapper withValueMapper(ValueMapper instance) {
+        List<ValueMapper> list = new ArrayList<>(valueMappers);
+        if (!list.contains(instance)) {
+            list.add(JaxbValueMapper.INSTANCE);
+            return withValueMappers(list);
+        }
+        return this;
+    }
+    public Mapper withoutValueMapper(ValueMapper instance) {
+        List<ValueMapper> list = new ArrayList<>(valueMappers);
+        if (list.removeIf(v -> v.equals(instance))) {
+            return withValueMappers(list);
+        }
+        return this;
+    }
+
+    public Mapper withSupportsJaxbAnnotations(Boolean supportsJaxbAnnotations) {
+        if (supportsJaxbAnnotations) {
+            return withValueMapper(JaxbValueMapper.INSTANCE);
+        } else {
+            return withoutValueMapper(JaxbValueMapper.INSTANCE);
+        }
+    }
 
     ///  PRIVATE METHODS
 
@@ -307,7 +338,7 @@ public class Mapper {
                 destinationField.setAccessible(true);
                 return (destination, o) -> {
                     try {
-                        destinationField.set(destination, ValueMapper.valueFor(this, destinationField, destinationClass,o));
+                        destinationField.set(destination, mapValue(destinationClass, destinationField, o));
                     } catch (Exception e) {
                         log.warn("When setting {} in {}: {}", o, destinationField, e.getMessage());
                     }
@@ -321,7 +352,7 @@ public class Mapper {
                 destinationField.setAccessible(true);
                 return (destination, o) -> {
                     try {
-                        Object convertedValue = ValueMapper.valueFor(this, destinationField, destinationField.getType(), o);
+                        Object convertedValue = mapValue(destinationClass, destinationField, o);
                         destinationField.set(destination, convertedValue);
                     } catch (Exception e) {
                         log.warn("When setting '{}' in {}: {}", o, destinationField, e.getMessage());
@@ -333,8 +364,15 @@ public class Mapper {
     }
 
 
-
-
+    public Object mapValue(Class<?> destinationClass, Field destinationField, Object o) {
+        for (ValueMapper valueMapper : valueMappers) {
+            ValueMapper.ValueMap result = valueMapper.mapValue(destinationClass, destinationField, o);
+            if (result.result() != null) {
+                return result.result();
+            }
+        }
+        return o;
+    }
 
 
 
