@@ -3,6 +3,7 @@ package nl.beeldengeluid.mapping;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -55,5 +56,8 @@ public class Destination {
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
     @Source(field ="moreJson", jsonPath = "date")
     LocalDate localDate;
+
+    @Source(field = "durationInMillis")
+    Duration duration;
 
 }

@@ -58,20 +58,14 @@ public class Mapper {
     @Getter
     private final boolean clearsJsonCacheEveryTime;
 
-    /**
-     * Custom mappers Destination Class -> Function
-     *
-     */
-    @With(AccessLevel.PACKAGE)
-    @lombok.Builder.Default
-    @Getter
-    private final Map<Class<?>, List<BiFunction<Object, Field, Optional<Object>>>> customMappers = Collections.emptyMap();
-
 
     @With(AccessLevel.PACKAGE)
     @lombok.Builder.Default
     @Getter
-    private final List<ValueMapper> valueMappers = List.of(JaxbValueMapper.INSTANCE, new EnumValueMapper(true));
+    private final List<ValueMapper<?>> valueMappers = List.of(
+        UnwrapCollectionsValueMapper.INSTANCE,
+        JaxbValueMapper.INSTANCE,
+        new EnumValueMapper(true));
 
 
     /**
@@ -159,72 +153,17 @@ public class Mapper {
     }
 
 
-    /**
-     * Adds a custom mapping from a {@link JsonNode} to {@code destinationClass}. This is
-     * a convenience version of {@link #withCustomMapper(Class, Class, Function)}, where the first argument is {@link JsonNode}{@code .class}
-     * @param destinationClass The target class
-     * @param mapper A {@link BiFunction} that accepts an object of type {@code SourceClass} and a {@link Field} in the destination where it is for.
-     * <p>
-     * @see #withCustomJsonMapper(Class, Function)
-     */
-    public <D> Mapper withCustomJsonMapper(Class<D> destinationClass,  BiFunction<JsonNode, Field, Optional<D>> mapper) {
-        return withCustomMapper(JsonNode.class, destinationClass, mapper);
-    }
 
-    /**
-     * Adds a custom mapping from a {@link JsonNode} to {@code destinationClass}. A convenience version
-     * of {@link #withCustomJsonMapper(Class, BiFunction)} which just accepts @ {@link Function} rather than a {@link BiFunction} because the second argument of the BiFunction can often just be ignored.
-     *
-     * @param destinationClass The target class
-     * @param mapper A {@link Function} that accepts an object of type {@code SourceClass} and produces an (optional of) the desired type.
-     * @return A new mapper with the custom mapper added.
-     */
-    public <D> Mapper withCustomJsonMapper(Class<D> destinationClass,  Function<JsonNode, Optional<D>> mapper) {
-        return withCustomJsonMapper(destinationClass, Functions.ignoreArg2(mapper));
-    }
-
-    /**
-     * Adds a custom mapping from {@code sourceClass} to {@code destinationClass}
-     * @param sourceClass The expected source type
-     * @param destinationClass The target class
-     * @param mapper A {@link BiFunction} that accepts an object of type {@code SourceClass} and a {@link Field} in the destination where it is for.
-     * @see #withCustomMapper(Class, Class, Function)
-     * @see #withCustomJsonMapper(Class, BiFunction)
-     * @return A new mapper with the custom mapper added.
-     */
-    public <S, D> Mapper withCustomMapper(Class<S> sourceClass, Class<D> destinationClass, BiFunction<S, Field, Optional<D>> mapper) {
-        var current = new HashMap<>(customMappers());
-        var list = current.get(destinationClass);
-        List<BiFunction<Object, Field, Optional<Object>>> newList = list == null ? new ArrayList<>() : new ArrayList<>(list);
-        newList.add((o, f) -> mapper.apply( (S) o, f).map(d -> d));
-        current.put(destinationClass, Collections.unmodifiableList(newList));
-        return withCustomMappers(Collections.unmodifiableMap(current));
-    }
-
-    /**
-     * Adds a custom mapping from {@code sourceClass} to {@code destinationClass}. A convenience version
-     * of {@link #withCustomMapper(Class, Class, BiFunction)} which just accepts @ {@link Function} rather than a {@link BiFunction} because the second argument of the BiFunction can often just be ignored.
-     * @param sourceClass The expected source type
-     * @param destinationClass The target class
-     * @param mapper A {@link Function} that accepts an object of type {@code SourceClass}
-     * @see #withCustomJsonMapper(Class, BiFunction) (Class, Function) For the common case where the source object is json
-     * @return A new mapper with the custom mapper added.
-     */
-    public <S, D> Mapper withCustomMapper(Class<S> sourceClass, Class<D> destinationClass, Function<S, Optional<D>> mapper) {
-        return withCustomMapper(sourceClass, destinationClass, Functions.ignoreArg2(mapper));
-    }
-
-
-    public Mapper withValueMapper(ValueMapper instance) {
-        List<ValueMapper> list = new ArrayList<>(valueMappers);
+    public Mapper withValueMapper(ValueMapper<?> instance) {
+        List<ValueMapper<?>> list = new ArrayList<>(valueMappers);
         if (!list.contains(instance)) {
-            list.add(JaxbValueMapper.INSTANCE);
+            list.add(instance);
             return withValueMappers(list);
         }
         return this;
     }
-    public Mapper withoutValueMapper(ValueMapper instance) {
-        List<ValueMapper> list = new ArrayList<>(valueMappers);
+    public Mapper withoutValueMapper(ValueMapper<?> instance) {
+        List<ValueMapper<?>> list = new ArrayList<>(valueMappers);
         if (list.removeIf(v -> v.equals(instance))) {
             return withValueMappers(list);
         }
@@ -233,9 +172,13 @@ public class Mapper {
 
     public Mapper withSupportsJaxbAnnotations(Boolean supportsJaxbAnnotations) {
         if (supportsJaxbAnnotations) {
-            return withValueMapper(JaxbValueMapper.INSTANCE);
+            return withValueMapper(new EnumValueMapper(true))
+                .withoutValueMapper(new EnumValueMapper(false))
+                .withValueMapper(JaxbValueMapper.INSTANCE);
         } else {
-            return withoutValueMapper(JaxbValueMapper.INSTANCE);
+            return withValueMapper(new EnumValueMapper(false))
+                .withoutValueMapper(new EnumValueMapper(true))
+                .withoutValueMapper(JaxbValueMapper.INSTANCE);
         }
     }
 
@@ -338,7 +281,8 @@ public class Mapper {
                 destinationField.setAccessible(true);
                 return (destination, o) -> {
                     try {
-                        destinationField.set(destination, mapValue(destinationClass, destinationField, o));
+                        MappedField f = new MappedField(destinationField.getName(), destinationClass, destinationField.getAnnotations());
+                        destinationField.set(destination, mapValue(f, o));
                     } catch (Exception e) {
                         log.warn("When setting {} in {}: {}", o, destinationField, e.getMessage());
                     }
@@ -352,7 +296,8 @@ public class Mapper {
                 destinationField.setAccessible(true);
                 return (destination, o) -> {
                     try {
-                        Object convertedValue = mapValue(destinationClass, destinationField, o);
+                        MappedField f = new MappedField(destinationField.getName(), destinationClass, destinationField.getAnnotations());
+                        Object convertedValue = mapValue(f, o);
                         destinationField.set(destination, convertedValue);
                     } catch (Exception e) {
                         log.warn("When setting '{}' in {}: {}", o, destinationField, e.getMessage());
@@ -364,11 +309,14 @@ public class Mapper {
     }
 
 
-    public Object mapValue(Class<?> destinationClass, Field destinationField, Object o) {
+    public Object mapValue(MappedField destinationField, Object o) {
         for (ValueMapper valueMapper : valueMappers) {
-            ValueMapper.ValueMap result = valueMapper.mapValue(destinationClass, destinationField, o);
-            if (result.result() != null) {
-                return result.result();
+            ValueMapper.ValueMap result = valueMapper.mapValue(this, destinationField, o);
+            if (result.success()) {
+                o = result.result();
+                if (result.terminate()) {
+                    break;
+                }
             }
         }
         return o;

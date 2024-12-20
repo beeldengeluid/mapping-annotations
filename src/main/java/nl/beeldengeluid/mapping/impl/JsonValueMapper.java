@@ -1,20 +1,20 @@
 package nl.beeldengeluid.mapping.impl;
 
-import nl.beeldengeluid.mapping.Mapper;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import nl.beeldengeluid.mapping.*;
 import nl.beeldengeluid.mapping.ValueMapper;
 
 import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.BiFunction;
 
-public class JsonValueMapper implements ValueMapper {
+public class JsonValueMapper implements ValueMapper<JsonNode> {
 
-
+      /*
     private static Object considerJson(Mapper mapper, Object o, Field destinationField, Class<?> destinationClass) {
+
         List<BiFunction<Object, Field, Optional<Object>>> customMappers = mapper.customMappers().get(destinationClass);
         if (customMappers != null) {
-            for (BiFunction<Object, Field, Optional<Object>> customMapper: customMappers){
+            for (BiFunction<Object, Field, Optional<Object>> customMapper : customMappers) {
                 Optional<Object> tryMap = customMapper.apply(o, destinationField);
                 if (tryMap.isPresent()) {
                     o = tryMap.get();
@@ -23,8 +23,10 @@ public class JsonValueMapper implements ValueMapper {
         }
         return o;
     }
+    */
+
     @Override
-    public ValueMap mapValue(Class<?> destinationClass, Field destinationField, Object o) {
+    public ValueMap mapValue(Mapper mapper, MappedField field, JsonNode o) {
         return null;
     }
 }

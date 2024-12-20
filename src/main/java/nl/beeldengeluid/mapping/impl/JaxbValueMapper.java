@@ -5,6 +5,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import lombok.extern.slf4j.Slf4j;
 
+import nl.beeldengeluid.mapping.*;
 import nl.beeldengeluid.mapping.ValueMapper;
 
 import java.lang.reflect.Field;
@@ -13,7 +14,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public class JaxbValueMapper implements ValueMapper {
+public class JaxbValueMapper implements ValueMapper<Object> {
 
     private static final Map<Field, Optional<XmlAdapter<?, ?>>> ADAPTERS = new ConcurrentHashMap<>();
 
@@ -49,7 +50,7 @@ public class JaxbValueMapper implements ValueMapper {
     }
 
     @Override
-    public ValueMap mapValue(Class<?> destinationClass, Field destinationField, Object o) {
+    public ValueMap mapValue(Mapper mapper, MappedField destinationField, Object o) {
         return considerXmlAdapter(o, destinationField);
     }
 }

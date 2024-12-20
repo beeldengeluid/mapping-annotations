@@ -5,13 +5,14 @@ import jakarta.xml.bind.annotation.XmlEnumValue;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import nl.beeldengeluid.mapping.*;
 import nl.beeldengeluid.mapping.ValueMapper;
 
 import java.lang.reflect.Field;
 
 @Getter
 @EqualsAndHashCode
-public class EnumValueMapper implements ValueMapper {
+public class EnumValueMapper implements ValueMapper<Object> {
 
 
     private final boolean considerXmlEnum;
@@ -21,10 +22,10 @@ public class EnumValueMapper implements ValueMapper {
     }
 
     @Override
-    public ValueMap mapValue(Class<?> destinationClass, Field destinationField, Object o) {
+    public ValueMap mapValue(Mapper mapper, MappedField destinationField, Object o) {
 
-        if (destinationField.getType().isEnum() && o instanceof String string) {
-            Class<Enum<?>> enumClass = (Class<Enum<?>>) destinationField.getType();
+        if (destinationField.type().isEnum() && o instanceof String string) {
+            Class<Enum<?>> enumClass = (Class<Enum<?>>) destinationField.type();
             if (considerXmlEnum) {
                 for (Enum<?> enumConstant : enumClass.getEnumConstants()) {
                     try {

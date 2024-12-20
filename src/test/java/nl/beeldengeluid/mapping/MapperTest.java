@@ -1,5 +1,7 @@
 package nl.beeldengeluid.mapping;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import lombok.extern.log4j.Log4j2;
 
 import java.nio.charset.StandardCharsets;
@@ -82,12 +84,12 @@ class MapperTest {
        assertThat(MAPPER.getMappedDestinationProperties(
            ExtendedSourceObject.class,
            Destination.class
-       ).keySet()).containsExactlyInAnyOrder("title", "description", "moreJson", "id", "list", "list2", "sub", "subs", "enumValue", "localDate");
+       ).keySet()).containsExactlyInAnyOrder("title", "description", "moreJson", "id", "list", "list2", "sub", "subs", "enumValue", "localDate", "duration");
 
        assertThat(MAPPER.getMappedDestinationProperties(
            SourceObject.class,
            Destination.class
-       ).keySet()).containsExactlyInAnyOrder("title", "description", "moreJson", "list", "list2", "sub", "subs", "enumValue", "localDate");
+       ).keySet()).containsExactlyInAnyOrder("title", "description", "moreJson", "list", "list2", "sub", "subs", "enumValue", "localDate", "duration");
    }
 
     @Test
@@ -123,11 +125,14 @@ class MapperTest {
     void customMapping() {
 
 
-        Mapper mapper = MAPPER.withCustomJsonMapper(SubDestination.class, (json, field) -> {
-            SubDestination so =  new SubDestination();
-            so.a(json.get("title").asText() + "/" + json.get("description").asText());
-            return Optional.of(so);
-
+        Mapper mapper = MAPPER.withValueMapper((m, clazz, field, value) -> {
+                if (value instanceof JsonNode json && field.getType().equals(SubDestination.class)) {
+                    SubDestination so = new SubDestination();
+                    so.a(json.get("title").asText() + "/" + json.get("description").asText());
+                    return ValueMapper.mapped(so);
+                } else {
+                    return ValueMapper.NOT_MAPPED;
+                }
             }
         );
 
@@ -148,20 +153,23 @@ class MapperTest {
     @Test
     void customMappingForList() {
 
-        Mapper mapper = MAPPER.withCustomJsonMapper(SubDestination.class, (json, field) -> {
-            if (json.isObject() && json.has("title") && json.has("description")) {
-                SubDestination so = new SubDestination();
-                so.a(json.get("title").asText() + "/" + json.get("description").asText());
-                return Optional.of(so);
-            } else {
-                return Optional.empty();
+        Mapper mapper = MAPPER.withValueMapper((m, clazz, field, value) -> {
+            if (value instanceof JsonNode json && field.getType().equals(SubDestination.class)) {
+                if (json.isObject() && json.has("title") && json.has("description")) {
+                    SubDestination so = new SubDestination();
+                    so.a(json.get("title").asText() + "/" + json.get("description").asText());
+                    return ValueMapper.mapped(so);
+                }
             }
+            return ValueMapper.NOT_MAPPED;
+
+        }).withValueMapper((m, clazz, field, value) -> {
+            if (value instanceof SubDestination s) {
+                if (s.b() == null) {
+                    s.b(field.getName());
+                }
             }
-        ).withCustomMapper(SubDestination.class, SubDestination.class, (s, f) -> {
-            if (s.b() == null) {
-                s.b(f.getName());
-            }
-            return Optional.of(s);
+            return ValueMapper.mapped(value);
         });
 
         SourceObject sourceObject = new SourceObject();
@@ -227,22 +235,20 @@ class MapperTest {
     void customMappingDuration() {
 
 
-        Mapper mapper = MAPPER.withValueMappers(List.of((clazz, field, value) -> {
-            return ValueMapper.NOT_MAPPED;
-            })
+        Mapper mapper = MAPPER.withValueMapper((m, clazz, field, value) -> {
+                if (field.getType().equals(Duration.class)) {
+                    if (value instanceof Number number) {
+                        return ValueMapper.mapped(Duration.ofMillis(number.longValue()));
+                    }
+                }
+                return ValueMapper.NOT_MAPPED;
+            }
         );
 
         SourceObject sourceObject = new SourceObject();
-        sourceObject.json("""
-            { sub: {
-                title: "foo",
-                description: "bar"
-                }
-            }
-            """.getBytes(StandardCharsets.UTF_8));
-
+        sourceObject.durationInMillis(1000);
         Destination destination = mapper.map(sourceObject, Destination.class);
-        assertThat(destination.sub().a()).isEqualTo("foo/bar");
+        assertThat(destination.duration()).isEqualTo(Duration.ofMillis(1000));
     }
 
 

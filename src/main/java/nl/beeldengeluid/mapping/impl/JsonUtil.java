@@ -72,11 +72,9 @@ public class JsonUtil {
             if (! UNSET.equals(annotation.jsonPointer())) {
                 throw new IllegalStateException();
             }
-            return getSourceJsonValueByPath(source, sourceField, annotation.path(), annotation.jsonPath())
-                .map(o -> ValueMapper.unwrapCollections( o, destination));
+            return getSourceJsonValueByPath(source, sourceField, annotation.path(), annotation.jsonPath());
         } else {
-            return getSourceJsonValueByPointer(source, sourceField, annotation.path(), annotation.jsonPointer())
-                .map(o -> ValueMapper.unwrapCollections( o, destination));
+            return getSourceJsonValueByPointer(source, sourceField, annotation.path(), annotation.jsonPointer());
         }
     }
 

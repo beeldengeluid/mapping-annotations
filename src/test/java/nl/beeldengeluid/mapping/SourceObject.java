@@ -8,6 +8,6 @@ public class SourceObject {
 
     String title;
 
-
+    long durationInMillis;
 
 }

@@ -31,32 +31,7 @@ public class ValueMapper {
 
 
 
-
-
-    static Object unwrapCollections(Object possiblyACollection, Field destination) {
-        if (possiblyACollection instanceof Collection<?> list) {
-            if (destination.getType() == List.class) {
-                ParameterizedType genericType = (ParameterizedType) destination.getGenericType();
-                Class<?> genericClass = (Class<?>) genericType.getActualTypeArguments()[0];
-                if (genericClass != Object.class) {
-                    return list.stream()
-                        .map(o -> {
-                                try {
-                                    Object mapped = subMap(current(), o, genericClass, destination);
-                                    return mapped;
-                                } catch (MapException me) {
-                                    log.warn(me.getMessage(), me);
-                                    return null;
-                                }
-                            }
-                        ).toList();
-                }
-            }
-
-        }
-        return possiblyACollection;
-
-    }
+ 
 
     /**
      *
