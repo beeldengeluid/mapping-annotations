@@ -1,14 +1,14 @@
 package nl.beeldengeluid.mapping.impl;
 
-import jakarta.xml.bind.annotation.XmlEnumValue;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import nl.beeldengeluid.mapping.*;
-import nl.beeldengeluid.mapping.ValueMapper;
-
 import java.lang.reflect.Field;
+
+import jakarta.xml.bind.annotation.XmlEnumValue;
+
+import nl.beeldengeluid.mapping.ValueMapper;
+import nl.beeldengeluid.mapping.*;
 
 @Getter
 @EqualsAndHashCode
@@ -24,8 +24,8 @@ public class EnumValueMapper implements ValueMapper<Object> {
     @Override
     public ValueMap mapValue(Mapper mapper, MappedField destinationField, Object o) {
 
-        if (destinationField.type().isEnum() && o instanceof String string) {
-            Class<Enum<?>> enumClass = (Class<Enum<?>>) destinationField.type();
+        if (destinationField.genericType() instanceof  Class<?> c && c.isEnum() && o instanceof String string) {
+            Class<Enum<?>> enumClass = (Class<Enum<?>>) c;
             if (considerXmlEnum) {
                 for (Enum<?> enumConstant : enumClass.getEnumConstants()) {
                     try {

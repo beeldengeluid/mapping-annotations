@@ -7,18 +7,13 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
-import nl.beeldengeluid.mapping.impl.*;
-
-import org.meeuw.functional.Functions;
 import nl.beeldengeluid.mapping.annotations.Source;
-
-
-import com.fasterxml.jackson.databind.JsonNode;
+import nl.beeldengeluid.mapping.impl.*;
 
 import static nl.beeldengeluid.mapping.annotations.Source.UNSET;
 import static nl.beeldengeluid.mapping.impl.Util.*;
@@ -281,7 +276,7 @@ public class Mapper {
                 destinationField.setAccessible(true);
                 return (destination, o) -> {
                     try {
-                        MappedField f = new MappedField(destinationField.getName(), destinationClass, destinationField.getAnnotations());
+                        MappedField f = MappedField.of(destinationField);
                         destinationField.set(destination, mapValue(f, o));
                     } catch (Exception e) {
                         log.warn("When setting {} in {}: {}", o, destinationField, e.getMessage());
@@ -296,7 +291,7 @@ public class Mapper {
                 destinationField.setAccessible(true);
                 return (destination, o) -> {
                     try {
-                        MappedField f = new MappedField(destinationField.getName(), destinationClass, destinationField.getAnnotations());
+                        MappedField f = MappedField.of(destinationField);
                         Object convertedValue = mapValue(f, o);
                         destinationField.set(destination, convertedValue);
                     } catch (Exception e) {

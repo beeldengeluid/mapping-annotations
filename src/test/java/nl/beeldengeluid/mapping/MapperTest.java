@@ -1,20 +1,19 @@
 package nl.beeldengeluid.mapping;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import lombok.extern.log4j.Log4j2;
 
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
+import static nl.beeldengeluid.mapping.Mapper.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static nl.beeldengeluid.mapping.Mapper.MAPPER;
 
 @Log4j2
 class MapperTest {
@@ -125,8 +124,9 @@ class MapperTest {
     void customMapping() {
 
 
-        Mapper mapper = MAPPER.withValueMapper((m, clazz, field, value) -> {
-                if (value instanceof JsonNode json && field.getType().equals(SubDestination.class)) {
+        Mapper mapper = MAPPER.withValueMapper((m,  field, value) -> {
+                if (value instanceof JsonNode json && field.genericType().equals(SubDestination.class)) {
+                    Field f;
                     SubDestination so = new SubDestination();
                     so.a(json.get("title").asText() + "/" + json.get("description").asText());
                     return ValueMapper.mapped(so);
@@ -153,8 +153,8 @@ class MapperTest {
     @Test
     void customMappingForList() {
 
-        Mapper mapper = MAPPER.withValueMapper((m, clazz, field, value) -> {
-            if (value instanceof JsonNode json && field.getType().equals(SubDestination.class)) {
+        Mapper mapper = MAPPER.withValueMapper((m,  field, value) -> {
+            if (value instanceof JsonNode json && field.genericType().equals(SubDestination.class)) {
                 if (json.isObject() && json.has("title") && json.has("description")) {
                     SubDestination so = new SubDestination();
                     so.a(json.get("title").asText() + "/" + json.get("description").asText());
@@ -163,10 +163,10 @@ class MapperTest {
             }
             return ValueMapper.NOT_MAPPED;
 
-        }).withValueMapper((m, clazz, field, value) -> {
+        }).withValueMapper((m, field, value) -> {
             if (value instanceof SubDestination s) {
                 if (s.b() == null) {
-                    s.b(field.getName());
+                    s.b(field.name());
                 }
             }
             return ValueMapper.mapped(value);
@@ -235,8 +235,8 @@ class MapperTest {
     void customMappingDuration() {
 
 
-        Mapper mapper = MAPPER.withValueMapper((m, clazz, field, value) -> {
-                if (field.getType().equals(Duration.class)) {
+        Mapper mapper = MAPPER.withValueMapper((m, field, value) -> {
+                if (field.genericType().equals(Duration.class)) {
                     if (value instanceof Number number) {
                         return ValueMapper.mapped(Duration.ofMillis(number.longValue()));
                     }

@@ -2,10 +2,8 @@ package nl.beeldengeluid.mapping.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import nl.beeldengeluid.mapping.*;
 import nl.beeldengeluid.mapping.ValueMapper;
-
-import java.lang.reflect.Field;
+import nl.beeldengeluid.mapping.*;
 
 public class JsonValueMapper implements ValueMapper<JsonNode> {
 

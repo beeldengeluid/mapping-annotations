@@ -1,13 +1,30 @@
 package nl.beeldengeluid.mapping;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 
-public record MappedField(String name, Type type, Annotation[] annotations)  {
+import nl.beeldengeluid.mapping.impl.ReflectMappedField;
 
+public interface MappedField {
 
-    static MappedField of(Field field) {
-        return new MappedField(field.getName(), field.getGenericType(), field.getAnnotations());
+    String name();
+
+    Type genericType();
+
+    default Class<?> type() {
+        if (genericType() instanceof ParameterizedType pt) {
+            return (Class<?>) pt.getRawType();
+        } else if (genericType() instanceof Class<?> c) {
+            return c;
+        } else {
+            throw new IllegalStateException();
+        }
     }
+
+    <T extends Annotation>  T annotation(Class<T> annotation);
+
+    static MappedField of (Field field){
+        return new ReflectMappedField(field);
+    }
+
 }
