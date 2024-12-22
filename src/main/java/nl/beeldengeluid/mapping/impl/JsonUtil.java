@@ -19,6 +19,8 @@ import com.jayway.jsonpath.*;
 import com.jayway.jsonpath.spi.json.JacksonJsonNodeJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 
+import nl.beeldengeluid.mapping.EffectiveSource;
+
 import static nl.beeldengeluid.mapping.annotations.Source.UNSET;
 import static nl.beeldengeluid.mapping.impl.Util.getAnnotation;
 
@@ -93,6 +95,7 @@ public class JsonUtil {
     // jsonpath would have its own cache, but it may be used by other
     // stuff. Since we know that there is a limited number of JsonPath object caused by us, we just use our hown cache, without any limitations.
     private static final Map<String, JsonPath> JSONPATH_CACHE = new ConcurrentHashMap<>();
+
     private static Optional<Object> getSourceJsonValueByPath(Object source, Field sourceField, String[] path, String jsonPath) {
 
          return getSourceJsonValue(source, sourceField, path)

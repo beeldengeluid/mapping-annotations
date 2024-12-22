@@ -1,5 +1,6 @@
-package nl.beeldengeluid.mapping;
+package nl.beeldengeluid.mapping.destinations;
 
+import io.github.threetenjaxb.core.LocalDateXmlAdapter;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,12 +10,18 @@ import java.util.List;
 
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import nl.beeldengeluid.mapping.annotations.Source;
-
 import com.fasterxml.jackson.databind.JsonNode;
 
-import nl.vpro.xml.bind.LocalDateXmlAdapter;
+import nl.beeldengeluid.mapping.annotations.Source;
+import nl.beeldengeluid.mapping.groups.Test1Class;
+import nl.beeldengeluid.mapping.groups.Test2Class;
+import nl.beeldengeluid.mapping.sources.ExtendedSourceObject;
+import nl.beeldengeluid.mapping.sources.SourceObject;
 
+
+/**
+ * A generic destination that mixes all kind of things.
+ */
 @Getter
 @Setter
 public class Destination {
@@ -38,10 +45,10 @@ public class Destination {
     Long id;
 
     @Source(field = "moreJson", jsonPointer ="/nisv.currentbroadcaster", groups = Test1Class.class)
-    List<SubSourceObject> list;
+    List<SubDestinationObject> list;
 
     @Source(field = "moreJson", jsonPath ="['nisv.currentbroadcaster'][*]['currentbroadcaster.broadcaster']", groups = Test2Class.class)
-    List<SubSourceObject> list2;
+    List<SubDestinationObject> list2;
 
     @Source(field = "json", jsonPointer = "/sub")
     SubDestination sub;
@@ -59,5 +66,8 @@ public class Destination {
 
     @Source(field = "durationInMillis")
     Duration duration;
+
+    @Source(field ="moreJson", jsonPath = "subObject")
+    SubObject subObject;
 
 }

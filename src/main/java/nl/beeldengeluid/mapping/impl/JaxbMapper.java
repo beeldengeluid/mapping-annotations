@@ -9,20 +9,23 @@ import java.util.concurrent.ConcurrentHashMap;
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import nl.beeldengeluid.mapping.ValueMapper;
+import nl.beeldengeluid.mapping.LeafMapper;
 import nl.beeldengeluid.mapping.*;
 
+/**
+ * Consider {@link XmlJavaTypeAdapter} annotations when mapping leaf values.
+ */
 @Slf4j
-public class JaxbValueMapper implements ValueMapper<Object> {
+public class JaxbMapper implements LeafMapper {
 
     private static final Map<MappedField, Optional<XmlAdapter<?, ?>>> ADAPTERS = new ConcurrentHashMap<>();
 
-    private JaxbValueMapper() {}
+    private JaxbMapper() {}
 
-    public static final JaxbValueMapper INSTANCE = new JaxbValueMapper();
+    public static final JaxbMapper INSTANCE = new JaxbMapper();
 
 
-    private static ValueMap considerXmlAdapter(Object o, MappedField destinationField)  {
+    private static Leaf considerXmlAdapter(Object o, MappedField destinationField)  {
         Optional<XmlAdapter<?, ?>> adapter = ADAPTERS.computeIfAbsent(destinationField, (field) -> {
             XmlJavaTypeAdapter annotation = field.annotation(XmlJavaTypeAdapter.class);
             if (annotation != null) {
@@ -38,7 +41,7 @@ public class JaxbValueMapper implements ValueMapper<Object> {
         if (adapter.isPresent()) {
             try {
                 //noinspection unchecked,rawtypes
-                return ValueMapper.mapped(((XmlAdapter) adapter.get()).unmarshal(o));
+                return LeafMapper.mapped(((XmlAdapter) adapter.get()).unmarshal(o));
             } catch (Exception e) {
                 log.warn(e.getMessage());
             }
@@ -49,7 +52,7 @@ public class JaxbValueMapper implements ValueMapper<Object> {
     }
 
     @Override
-    public ValueMap mapValue(Mapper mapper, MappedField destinationField, Object o) {
+    public Leaf map(Mapper mapper, MappedField destinationField, Object o) {
         return considerXmlAdapter(o, destinationField);
     }
 }

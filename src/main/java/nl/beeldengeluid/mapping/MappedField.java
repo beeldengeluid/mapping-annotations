@@ -2,6 +2,7 @@ package nl.beeldengeluid.mapping;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.util.Optional;
 
 import nl.beeldengeluid.mapping.impl.ReflectMappedField;
 
@@ -23,8 +24,13 @@ public interface MappedField {
 
     <T extends Annotation>  T annotation(Class<T> annotation);
 
-    static MappedField of (Field field){
-        return new ReflectMappedField(field);
+
+    Optional<EffectiveSource> source();
+
+    //<T extends Annotation>  T annotation(Class<T> annotation);
+
+    static MappedField of (Field field, EffectiveSource source){
+        return new ReflectMappedField(field, source);
     }
 
 }

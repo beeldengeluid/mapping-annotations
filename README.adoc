@@ -50,7 +50,7 @@ Mapper.MAPPER.map(sourceObject, destination);;
 
 So, this initial implementation:
 
-- Makes no efforts _creating_ the objects. It just _fills_ them using reflection/direct field access
+- Makes little effort _creating_ the objects. It just _fills_ them using reflection/direct field access.
 
 - So the object need be modifiable, but see link:#java_records[how it is supported for java records], immutability can be obtained by mapping to a builder.
 
@@ -151,17 +151,19 @@ public class Program {
 For all fields in this class with `@Source` annotations the default value of the `sourceClass` and `field` attributes are not empty, but as specified on class level. In this way it is easy to map a bunch of field all from one source field (in this case `payload`), in this case for example by only specifing `@Source(jsonPointer='<something>')`
 
 
-== Custom mappings
+== Leaf mappings
 
-Sometimes it's not feasible to map a suboject entirely by just adding annotaions.
+Sometimes it's not feasible to map a suboject entirely by just adding annotations.
 
 E.g. a 'json' payload can be pointed to, but automatic unmapping of this is not feasible.
 
-The mapper can have custom mappings then:
+In other words, the end of the route to the value ('the leaf') may be a type that does not correspond yet to type of the field where it should be stored in.
+
+The mapper can have custom 'leaf' mappings then:
 
 [source, java]
 ----
-Mapper mapper = MAPPER.withCustomMapper(destinationType, (o) -> {
+Mapper mapper = MAPPER.withLeafMapper((mapper, field, value) -> {
   return <new object of type destiatnionType mapped from incoming o>
 }
 

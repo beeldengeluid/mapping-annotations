@@ -6,11 +6,13 @@ package nl.beeldengeluid.mapping;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import nl.beeldengeluid.mapping.annotations.Source;
 import nl.beeldengeluid.mapping.impl.*;
@@ -57,10 +59,12 @@ public class Mapper {
     @With(AccessLevel.PACKAGE)
     @lombok.Builder.Default
     @Getter
-    private final List<ValueMapper<?>> valueMappers = List.of(
-        UnwrapCollectionsValueMapper.INSTANCE,
-        JaxbValueMapper.INSTANCE,
-        new EnumValueMapper(true));
+    private final List<LeafMapper> leafMappers = Stream.of(
+        UnwrapCollectionsMapper.INSTANCE,
+        JaxbMapper.INSTANCE,
+        new EnumMapper(true),
+        RecursiveMapper.INSTANCE
+        ).sorted().toList();
 
 
     /**
@@ -73,14 +77,19 @@ public class Mapper {
      * @return a new object of class {@code destinationClass} which all fields filled that are found in {@code source}
      */
     public <T> T map(Object source, Class<T> destinationClass, Class<?>... groups)  {
+        T destination = newInstance(destinationClass);
+        map(source, destination, groups);
+        return destination;
+    }
+
+
+
+    public <T> T newInstance(Class<T> destinationClass)  {
         try {
-            T destination = destinationClass.getDeclaredConstructor().newInstance();
-            map(source, destination, groups);
-            return destination;
+            return destinationClass.getDeclaredConstructor().newInstance();
         } catch (ReflectiveOperationException e) {
             throw new MapException(e);
         }
-
     }
 
 
@@ -103,6 +112,17 @@ public class Mapper {
         }
     }
 
+    public boolean canMap(Object source, Class<?> destinationClass, Class<?>... groups) {
+        try {
+            if (!destinationClass.isInstance(source)) {
+                Constructor<?> declaredConstructor = destinationClass.getDeclaredConstructor();
+                return true;
+            }
+        } catch (ReflectiveOperationException e) {
+        }
+        return false;
+    }
+
     /**
      * Just like {@link #map(Object, Object, Class[])}, but the json cache will not be deleted, and {@link #CURRENT} will not be
      * set nor removed. This is basically meant to be called by sub mappings.
@@ -112,7 +132,7 @@ public class Mapper {
      */
      public void subMap(Object source, Object destination, Class<?> destinationClass, Class<?>... groups) {
          privateMap(source, destination, destinationClass, groups);
-    }
+     }
 
     /**
      * Given a {@code sourceClass} and a {@code destinationClass} will indicate which fields  (in the destination) will be mapped.
@@ -149,31 +169,32 @@ public class Mapper {
 
 
 
-    public Mapper withValueMapper(ValueMapper<?> instance) {
-        List<ValueMapper<?>> list = new ArrayList<>(valueMappers);
+    public Mapper withLeafMapper(LeafMapper instance) {
+        List<LeafMapper> list = new ArrayList<>(leafMappers);
         if (!list.contains(instance)) {
             list.add(instance);
-            return withValueMappers(list);
+            list.sort(Comparator.naturalOrder());
+            return withLeafMappers(list);
         }
         return this;
     }
-    public Mapper withoutValueMapper(ValueMapper<?> instance) {
-        List<ValueMapper<?>> list = new ArrayList<>(valueMappers);
+    public Mapper withoutLeafMapper(LeafMapper instance) {
+        List<LeafMapper> list = new ArrayList<>(leafMappers);
         if (list.removeIf(v -> v.equals(instance))) {
-            return withValueMappers(list);
+            return withLeafMappers(list);
         }
         return this;
     }
 
     public Mapper withSupportsJaxbAnnotations(Boolean supportsJaxbAnnotations) {
         if (supportsJaxbAnnotations) {
-            return withValueMapper(new EnumValueMapper(true))
-                .withoutValueMapper(new EnumValueMapper(false))
-                .withValueMapper(JaxbValueMapper.INSTANCE);
+            return withLeafMapper(new EnumMapper(true))
+                .withoutLeafMapper(new EnumMapper(false))
+                .withLeafMapper(JaxbMapper.INSTANCE);
         } else {
-            return withValueMapper(new EnumValueMapper(false))
-                .withoutValueMapper(new EnumValueMapper(true))
-                .withoutValueMapper(JaxbValueMapper.INSTANCE);
+            return withLeafMapper(new EnumMapper(false))
+                .withoutLeafMapper(new EnumMapper(true))
+                .withoutLeafMapper(JaxbMapper.INSTANCE);
         }
     }
 
@@ -230,6 +251,10 @@ public class Mapper {
         if (annotation.isPresent()) {
             final EffectiveSource s = annotation.get();
             String sourceFieldName = s.field();
+
+            // TODO, may be we can just consider also 'json' values as 'leaf' mappers,
+            // and all this stuff may get cleaner.
+
             if (isJsonField(sourceClass)) {
               return Optional.of(JsonUtil.valueFromJsonGetter(s));
             }
@@ -276,8 +301,8 @@ public class Mapper {
                 destinationField.setAccessible(true);
                 return (destination, o) -> {
                     try {
-                        MappedField f = MappedField.of(destinationField);
-                        destinationField.set(destination, mapValue(f, o));
+                        MappedField f = MappedField.of(destinationField, effectiveSource);
+                        destinationField.set(destination, mapLeaf(f, o));
                     } catch (Exception e) {
                         log.warn("When setting {} in {}: {}", o, destinationField, e.getMessage());
                     }
@@ -291,8 +316,8 @@ public class Mapper {
                 destinationField.setAccessible(true);
                 return (destination, o) -> {
                     try {
-                        MappedField f = MappedField.of(destinationField);
-                        Object convertedValue = mapValue(f, o);
+                        MappedField f = MappedField.of(destinationField, effectiveSource);
+                        Object convertedValue = mapLeaf(f, o);
                         destinationField.set(destination, convertedValue);
                     } catch (Exception e) {
                         log.warn("When setting '{}' in {}: {}", o, destinationField, e.getMessage());
@@ -304,9 +329,9 @@ public class Mapper {
     }
 
 
-    public Object mapValue(MappedField destinationField, Object o) {
-        for (ValueMapper valueMapper : valueMappers) {
-            ValueMapper.ValueMap result = valueMapper.mapValue(this, destinationField, o);
+    public Object mapLeaf(MappedField destinationField, Object o) {
+        for (LeafMapper valueMapper : leafMappers) {
+            LeafMapper.Leaf result = valueMapper.map(this, destinationField, o);
             if (result.success()) {
                 o = result.result();
                 if (result.terminate()) {

@@ -1,11 +1,8 @@
 package nl.beeldengeluid.mapping.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import nl.beeldengeluid.mapping.ValueMapper;
 import nl.beeldengeluid.mapping.*;
 
-public class JsonValueMapper implements ValueMapper<JsonNode> {
+public class JsonValueMapper implements LeafMapper {
 
       /*
     private static Object considerJson(Mapper mapper, Object o, Field destinationField, Class<?> destinationClass) {
@@ -24,7 +21,7 @@ public class JsonValueMapper implements ValueMapper<JsonNode> {
     */
 
     @Override
-    public ValueMap mapValue(Mapper mapper, MappedField field, JsonNode o) {
+    public Leaf map(Mapper mapper, MappedField field, Object o) {
         return null;
     }
 }

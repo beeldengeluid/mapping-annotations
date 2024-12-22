@@ -6,10 +6,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import nl.beeldengeluid.mapping.Destination;
-import nl.beeldengeluid.mapping.ExtendedSourceObject;
-import nl.beeldengeluid.mapping.SourceObject;
-import nl.beeldengeluid.mapping.SubSourceObject;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,8 +17,14 @@ import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import nl.beeldengeluid.mapping.destinations.Destination;
+import nl.beeldengeluid.mapping.destinations.SubDestinationObject;
+import nl.beeldengeluid.mapping.sources.ExtendedSourceObject;
+import nl.beeldengeluid.mapping.sources.SourceObject;
+
 import static nl.beeldengeluid.mapping.Mapper.MAPPER;
+import static nl.vpro.test.util.jackson2.Jackson2TestUtil.assertThatJson;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Log4j2
 class JsonUtilTest {
@@ -86,7 +88,7 @@ class JsonUtilTest {
 
     @Test
     public void mapJsonObject() throws JsonProcessingException {
-        SubSourceObject subObject = new SubSourceObject();
+        SubDestinationObject subObject = new SubDestinationObject();
 
         JsonNode node = new ObjectMapper().readTree("""
           {
@@ -108,6 +110,7 @@ class JsonUtilTest {
         SourceObject source = new SourceObject();
         source.moreJson("""
           {
+            "otherField": {},
             "nisv.currentbroadcaster": [
                           {
                             "currentbroadcaster.broadcaster": {
@@ -128,11 +131,21 @@ class JsonUtilTest {
           """);
 
 
-        List<SubSourceObject> list = (List<SubSourceObject>) JsonUtil.getSourceValueFromJson(source, Destination.class, Destination.class.getDeclaredField("list"), List.of()).orElseThrow();
+        List<JsonNode> list = (List<JsonNode>) JsonUtil.getSourceValueFromJson(source, Destination.class, Destination.class.getDeclaredField("list"), List.of()).orElseThrow();
 
         assertThat(list).hasSize(2);
 
-        assertThat(list.get(0).broadcaster()).isEqualTo("VPRO");
+        assertThatJson(list.get(0).toPrettyString()).isSimilarTo(
+            """
+                {
+                    "currentbroadcaster.broadcaster" : {
+                      "value" : "209345",
+                      "origin" : "https://lab-vapp-bng-01.mam.beeldengeluid.nl/api/metadata/thesaurus/~THE30/209345",
+                      "resolved_value" : "VPRO"
+                    }
+                }
+                """
+        );
 
     }
 
@@ -166,7 +179,7 @@ class JsonUtilTest {
 
         MappingProvider mappingProvider = new JacksonMappingProvider();
 
-        List<SubSourceObject> list2 = (List<SubSourceObject>) JsonUtil.getSourceValueFromJson(source, Destination.class, Destination.class.getDeclaredField("list2"), List.of()).orElseThrow();
+        List<SubDestinationObject> list2 = (List<SubDestinationObject>) JsonUtil.getSourceValueFromJson(source, Destination.class, Destination.class.getDeclaredField("list2"), List.of()).orElseThrow();
 
         assertThat(list2).hasSize(2);
 

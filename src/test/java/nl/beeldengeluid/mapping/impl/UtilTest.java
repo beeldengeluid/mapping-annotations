@@ -5,13 +5,11 @@ import lombok.extern.log4j.Log4j2;
 import java.lang.reflect.Field;
 import java.util.Optional;
 
-import nl.beeldengeluid.mapping.AnotherSource;
-import nl.beeldengeluid.mapping.ExtendedSourceObject;
-import nl.beeldengeluid.mapping.SourceObject;
-import nl.beeldengeluid.mapping.SubSourceObject;
 import org.junit.jupiter.api.Test;
 
 import com.jayway.jsonpath.JsonPath;
+
+import nl.beeldengeluid.mapping.sources.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,7 +51,7 @@ class UtilTest {
     @Test
     void withPath() {
         ExtendedSourceObject source = new ExtendedSourceObject();
-        source.subObject(new SubSourceObject(null, null, 123L));
+        source.subObject(new SubSourceObject(123L));
 
 
         Optional<Object> id = Util.getSourceValue(source, "subObject", "id");

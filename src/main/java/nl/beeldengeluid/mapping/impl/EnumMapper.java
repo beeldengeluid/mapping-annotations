@@ -7,22 +7,22 @@ import java.lang.reflect.Field;
 
 import jakarta.xml.bind.annotation.XmlEnumValue;
 
-import nl.beeldengeluid.mapping.ValueMapper;
+import nl.beeldengeluid.mapping.LeafMapper;
 import nl.beeldengeluid.mapping.*;
 
 @Getter
 @EqualsAndHashCode
-public class EnumValueMapper implements ValueMapper<Object> {
+public class EnumMapper implements LeafMapper {
 
 
     private final boolean considerXmlEnum;
 
-    public EnumValueMapper(boolean considerXmlEnum) {
+    public EnumMapper(boolean considerXmlEnum) {
         this.considerXmlEnum = considerXmlEnum;
     }
 
     @Override
-    public ValueMap mapValue(Mapper mapper, MappedField destinationField, Object o) {
+    public Leaf map(Mapper mapper, MappedField destinationField, Object o) {
 
         if (destinationField.genericType() instanceof  Class<?> c && c.isEnum() && o instanceof String string) {
             Class<Enum<?>> enumClass = (Class<Enum<?>>) c;
@@ -32,7 +32,7 @@ public class EnumValueMapper implements ValueMapper<Object> {
                         Field f = enumConstant.getDeclaringClass().getField(enumConstant.name());
                         XmlEnumValue xmlValue = f.getAnnotation(XmlEnumValue.class);
                         if (xmlValue != null && xmlValue.value().equals(string)) {
-                            return ValueMapper.mapped(enumConstant);
+                            return LeafMapper.mapped(enumConstant);
                         }
                     } catch (NoSuchFieldException e) {
                         throw new RuntimeException(e);
@@ -41,11 +41,11 @@ public class EnumValueMapper implements ValueMapper<Object> {
             }
             for (Enum<?> enumConstant : enumClass.getEnumConstants()) {
                 if (enumConstant.name().equals(string)) {
-                    return ValueMapper.mapped(enumConstant);
+                    return LeafMapper.mapped(enumConstant);
                 }
             }
 
         }
-        return ValueMapper.NOT_MAPPED;
+        return LeafMapper.NOT_MAPPED;
     }
 }

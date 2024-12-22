@@ -1,4 +1,4 @@
-package nl.beeldengeluid.mapping;
+package nl.beeldengeluid.mapping.sources;
 
 @lombok.Data
 public class SourceObject {
@@ -8,6 +8,6 @@ public class SourceObject {
 
     String title;
 
-    long durationInMillis;
+    Long durationInMillis;
 
 }

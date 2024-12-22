@@ -1,4 +1,4 @@
-package nl.beeldengeluid.mapping;
+package nl.beeldengeluid.mapping.destinations;
 
 import jakarta.xml.bind.annotation.XmlEnumValue;
 

@@ -1,4 +1,4 @@
-package nl.beeldengeluid.mapping;
+package nl.beeldengeluid.mapping.sources;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

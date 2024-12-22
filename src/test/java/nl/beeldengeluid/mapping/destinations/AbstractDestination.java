@@ -1,9 +1,13 @@
-package nl.beeldengeluid.mapping;
+package nl.beeldengeluid.mapping.destinations;
 
 import lombok.Data;
 
 import nl.beeldengeluid.mapping.annotations.Source;
 
+
+/**
+ * A base class so we test inheritance
+ */
 @Data
 public abstract class AbstractDestination {
 

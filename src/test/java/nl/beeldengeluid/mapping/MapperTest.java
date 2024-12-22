@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import nl.beeldengeluid.mapping.destinations.*;
+import nl.beeldengeluid.mapping.sources.*;
+
 import static nl.beeldengeluid.mapping.Mapper.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -57,7 +60,7 @@ class MapperTest {
             Destination destination = new Destination();
             ExtendedSourceObject sourceObject = new ExtendedSourceObject();
             sourceObject.title("foobar");
-            sourceObject.subObject(new SubSourceObject("a", null, 1L ));
+            //sourceObject.subObject(new SubSourceObject("a", null, 1L ));
             sourceObject.moreJson(moreJson);
 
             mapper.map(sourceObject, destination);
@@ -83,12 +86,12 @@ class MapperTest {
        assertThat(MAPPER.getMappedDestinationProperties(
            ExtendedSourceObject.class,
            Destination.class
-       ).keySet()).containsExactlyInAnyOrder("title", "description", "moreJson", "id", "list", "list2", "sub", "subs", "enumValue", "localDate", "duration");
+       ).keySet()).containsExactlyInAnyOrder("title", "description", "moreJson", "id", "list", "list2", "sub", "subs", "enumValue", "localDate", "duration", "subObject");
 
        assertThat(MAPPER.getMappedDestinationProperties(
            SourceObject.class,
            Destination.class
-       ).keySet()).containsExactlyInAnyOrder("title", "description", "moreJson", "list", "list2", "sub", "subs", "enumValue", "localDate", "duration");
+       ).keySet()).containsExactlyInAnyOrder("title", "description", "moreJson", "list", "list2", "sub", "subs", "enumValue", "localDate", "duration", "subObject");
    }
 
     @Test
@@ -107,7 +110,7 @@ class MapperTest {
             }
             """.getBytes(StandardCharsets.UTF_8));
 
-        AnotherDestination anotherDestination = MAPPER.map(sourceObject, AnotherDestination.class);
+        FromJsonFieldDestination anotherDestination = MAPPER.map(sourceObject, FromJsonFieldDestination.class);
         assertThat(anotherDestination.title()).isEqualTo("foo");
         assertThat(anotherDestination.description()).isEqualTo("bar");
 
@@ -124,14 +127,14 @@ class MapperTest {
     void customMapping() {
 
 
-        Mapper mapper = MAPPER.withValueMapper((m,  field, value) -> {
+        Mapper mapper = MAPPER.withLeafMapper((m, field, value) -> {
                 if (value instanceof JsonNode json && field.genericType().equals(SubDestination.class)) {
                     Field f;
                     SubDestination so = new SubDestination();
                     so.a(json.get("title").asText() + "/" + json.get("description").asText());
-                    return ValueMapper.mapped(so);
+                    return LeafMapper.mapped(so);
                 } else {
-                    return ValueMapper.NOT_MAPPED;
+                    return LeafMapper.NOT_MAPPED;
                 }
             }
         );
@@ -153,23 +156,23 @@ class MapperTest {
     @Test
     void customMappingForList() {
 
-        Mapper mapper = MAPPER.withValueMapper((m,  field, value) -> {
+        Mapper mapper = MAPPER.withLeafMapper((m, field, value) -> {
             if (value instanceof JsonNode json && field.genericType().equals(SubDestination.class)) {
                 if (json.isObject() && json.has("title") && json.has("description")) {
                     SubDestination so = new SubDestination();
                     so.a(json.get("title").asText() + "/" + json.get("description").asText());
-                    return ValueMapper.mapped(so);
+                    return LeafMapper.mapped(so);
                 }
             }
-            return ValueMapper.NOT_MAPPED;
+            return LeafMapper.NOT_MAPPED;
 
-        }).withValueMapper((m, field, value) -> {
+        }).withLeafMapper((m, field, value) -> {
             if (value instanceof SubDestination s) {
                 if (s.b() == null) {
                     s.b(field.name());
                 }
             }
-            return ValueMapper.mapped(value);
+            return LeafMapper.mapped(value);
         });
 
         SourceObject sourceObject = new SourceObject();
@@ -235,22 +238,52 @@ class MapperTest {
     void customMappingDuration() {
 
 
-        Mapper mapper = MAPPER.withValueMapper((m, field, value) -> {
+        Mapper mapper = MAPPER.withLeafMapper((m, field, value) -> {
                 if (field.genericType().equals(Duration.class)) {
                     if (value instanceof Number number) {
-                        return ValueMapper.mapped(Duration.ofMillis(number.longValue()));
+                        return LeafMapper.mapped(Duration.ofMillis(number.longValue()));
                     }
                 }
-                return ValueMapper.NOT_MAPPED;
+                return LeafMapper.NOT_MAPPED;
             }
         );
 
         SourceObject sourceObject = new SourceObject();
-        sourceObject.durationInMillis(1000);
+        sourceObject.durationInMillis(1000L);
         Destination destination = mapper.map(sourceObject, Destination.class);
         assertThat(destination.duration()).isEqualTo(Duration.ofMillis(1000));
     }
 
+    @Test
+    public void subJson() {
+        SourceObject source = new SourceObject();
+        source.moreJson("""
+          {
+            "otherField": {},
+            "nisv.currentbroadcaster": [
+                          {
+                            "currentbroadcaster.broadcaster": {
+                              "value": "209345",
+                              "origin": "https://lab-vapp-bng-01.mam.beeldengeluid.nl/api/metadata/thesaurus/~THE30/209345",
+                              "resolved_value": "VPRO"
+                            }
+                          },
+                          {
+                            "currentbroadcaster.broadcaster": {
+                              "value": "209346",
+                              "origin": "https://lab-vapp-bng-01.mam.beeldengeluid.nl/api/metadata/thesaurus/~THE30/209346",
+                              "resolved_value": "TROS"
+                            }
+                          }
+                        ]
+          }
+          """);
+        Destination destination = MAPPER.map(source, Destination.class);
+
+        assertThat(destination.list().get(0).broadcaster()).isEqualTo("VPRO");
+        //assertThat(destination.subObject().b()).isEqualTo("bar");
+
+    }
 
 
 }

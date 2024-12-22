@@ -9,11 +9,12 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
+import nl.beeldengeluid.mapping.EffectiveSource;
 import nl.beeldengeluid.mapping.Mapper;
 import nl.beeldengeluid.mapping.annotations.Source;
 import nl.beeldengeluid.mapping.annotations.Sources;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 import static nl.beeldengeluid.mapping.annotations.Source.UNSET;
 
@@ -165,7 +166,6 @@ public class Util {
     }
 
     public static Optional<Object> getSourceValue(Object source, String sourceField, String... path) {
-
          return getSourceField(source.getClass(), sourceField)
              .flatMap(f -> getSourceValue(source, f, path));
     }

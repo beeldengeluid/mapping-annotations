@@ -1,4 +1,4 @@
-package nl.beeldengeluid.mapping.impl;
+package nl.beeldengeluid.mapping;
 
 import java.util.Arrays;
 
