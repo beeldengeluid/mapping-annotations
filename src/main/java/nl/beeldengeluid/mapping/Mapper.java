@@ -178,6 +178,19 @@ public class Mapper {
         }
         return this;
     }
+
+    public <S, D> Mapper withLeafMapper(Class<S> source, Class<D> destination, Function<S, D> function) {
+        return withLeafMapper(new LeafMapper() {
+            @Override
+            public Leaf map(Mapper mapper, MappedField destinationField, Object o) {
+                if (destination.isAssignableFrom(destinationField.type()) && source.isInstance(o)) {
+                    return LeafMapper.mapped(function.apply((S) o));
+                }
+                return LeafMapper.NOT_MAPPED;
+            }
+        });
+    }
+
     public Mapper withoutLeafMapper(LeafMapper instance) {
         List<LeafMapper> list = new ArrayList<>(leafMappers);
         if (list.removeIf(v -> v.equals(instance))) {
