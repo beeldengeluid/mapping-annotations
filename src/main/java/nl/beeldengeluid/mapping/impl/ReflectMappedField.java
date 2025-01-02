@@ -8,6 +8,10 @@ import java.util.Optional;
 import nl.beeldengeluid.mapping.EffectiveSource;
 import nl.beeldengeluid.mapping.MappedField;
 
+
+/**
+ * @see MappedField
+ */
 public class ReflectMappedField implements MappedField {
 
     private final Field field;

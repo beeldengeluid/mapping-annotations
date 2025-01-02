@@ -19,6 +19,11 @@ public interface LeafMapper extends Comparable<LeafMapper> {
     Leaf map(Mapper mapper, MappedField destinationField, Object o);
 
 
+    /**
+     * The order of the registered 'leaf mappers' may be influenced using this.
+     *
+     * @return an integer. Smaller is earlier. Default to {@code 100}
+     */
     default int weight() {
         return 100;
     }
@@ -26,7 +31,6 @@ public interface LeafMapper extends Comparable<LeafMapper> {
     default int compareTo(LeafMapper leafMapper) {
         return weight() - leafMapper.weight();
     }
-
 
 
     Leaf NOT_MAPPED = new Leaf(null, false, false);

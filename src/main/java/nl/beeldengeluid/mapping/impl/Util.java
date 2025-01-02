@@ -96,10 +96,7 @@ public class Util {
     }
 
     public static boolean isJsonField(Class<?> clazz) {
-        if (JsonNode.class.isAssignableFrom(clazz)) {
-            return true;
-        }
-        return false;
+        return JsonNode.class.isAssignableFrom(clazz);
 
     }
 
@@ -156,7 +153,7 @@ public class Util {
                     Field declaredField = clazz.getDeclaredField(sourceField);
                     declaredField.setAccessible(true);
                     return Optional.of(declaredField);
-                } catch (NoSuchFieldException nsfe) {
+                } catch (NoSuchFieldException ignored) {
 
                 }
                 clazz = clazz.getSuperclass();

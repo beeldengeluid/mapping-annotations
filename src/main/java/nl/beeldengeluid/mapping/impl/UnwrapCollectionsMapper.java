@@ -8,6 +8,10 @@ import java.util.*;
 
 import nl.beeldengeluid.mapping.*;
 
+
+/**
+ * If a leaf contains a {@link Collection} this {@link LeafMapper} will call the mapper for all of <em>its</em> elements.
+ */
 @Slf4j
 @EqualsAndHashCode
 public class UnwrapCollectionsMapper implements LeafMapper {

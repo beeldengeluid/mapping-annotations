@@ -4,6 +4,17 @@ import java.util.Arrays;
 
 import nl.beeldengeluid.mapping.annotations.Source;
 
+
+/**
+ * {@code Source} annotations can be on class and on field level. This 'EffectiveSource' contains the effective value of all attributes.
+ *
+ * @param sourceClass See {@link Source#sourceClass()}
+ * @param jsonPath See {@link Source#jsonPath()}
+ * @param jsonPointer See {@link Source#jsonPointer()}
+ * @param field See {@link Source#field()}
+ * @param path See {@link Source#path()}
+ * @param groups See {@link Source#groups()}
+ */
 @lombok.Builder
 public record EffectiveSource(
     Class<?> sourceClass,

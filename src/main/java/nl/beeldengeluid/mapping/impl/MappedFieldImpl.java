@@ -8,7 +8,13 @@ import java.util.Optional;
 import nl.beeldengeluid.mapping.EffectiveSource;
 import nl.beeldengeluid.mapping.MappedField;
 
-public record MappedFieldImpl(String name, Type genericType, EffectiveSource s) implements MappedField {
+/**
+ * @see MappedField
+ * @param name
+ * @param genericType
+ * @param effectiveSource
+ */
+public record MappedFieldImpl(String name, Type genericType,  EffectiveSource effectiveSource) implements MappedField {
 
 
     @Override
@@ -18,6 +24,6 @@ public record MappedFieldImpl(String name, Type genericType, EffectiveSource s) 
 
     @Override
     public Optional<EffectiveSource> source() {
-        return Optional.ofNullable(s);
+        return Optional.ofNullable(effectiveSource);
     }
 }

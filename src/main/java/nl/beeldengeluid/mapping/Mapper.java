@@ -110,8 +110,7 @@ public class Mapper {
     }
 
     /**
-     * Just like {@link #map(Object, Object, Class[])}, but the json cache will not be deleted, and {@link #CURRENT} will not be
-     * set nor removed. This is basically meant to be called by sub mappings.
+     * Just like {@link #map(Object, Object, Class[])}, but for example the json cache will not be cleared (if {@link #clearsJsonCacheEveryTime}). This is basically meant to be called by sub mappings.
      * @param source The source object
      * @param destination The destination object
      * @param groups If not empty, only mapping is done if one (or more) of the given groups matches one of the groups of the source annotations.
@@ -171,7 +170,6 @@ public class Mapper {
             public int weight() {
                 return 0;
             }
-            @SuppressWarnings("unchecked")
             @Override
             public Leaf map(Mapper mapper, MappedField destinationField, Object o) {
                 if (destination.isAssignableFrom(destinationField.type()) && source.isInstance(o)) {

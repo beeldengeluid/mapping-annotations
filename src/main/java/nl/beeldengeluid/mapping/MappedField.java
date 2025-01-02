@@ -6,6 +6,10 @@ import java.util.Optional;
 
 import nl.beeldengeluid.mapping.impl.ReflectMappedField;
 
+/**
+ * Representation of a mapped field. The most basic implemetnation is {@link ReflectMappedField} which just wraps an actual {@link Field}.
+ * But sometimes a field is kind of 'virtual', e.g. entries in a collection. In that case {@link nl.beeldengeluid.mapping.impl.MappedFieldImpl} is used.
+ */
 public interface MappedField {
 
     String name();
