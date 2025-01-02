@@ -37,12 +37,6 @@ jobs:
           (cd src/main/java; mv module-info.java.not module-info.java)
           cp -f src/main/java/module-info.java target/delombok
           mvn -Pdeploy -B test install
-      - uses: codecov/codecov-action@v5
-        with:
-          files: target/site/jacoco/jacoco.xml
-          verbose: true
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: mihxil/mapping-annotations
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2.18.0
         if: always()
