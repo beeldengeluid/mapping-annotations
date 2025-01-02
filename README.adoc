@@ -3,9 +3,9 @@
 
 image:https://github.com/beeldengeluid/mapping-annotations/actions/workflows/maven.yml/badge.svg?[Build Status,link=https://github.com/beeldengeluid/mapping-annotations/actions/workflows/maven.yml]
 //image:https://codecov.io/gh/mihxil/mapping-annotations/branch/main/graph/badge.svg[codecov,link=https://codecov.io/gh/mihxil/mapping-annotations]
-//image:https://img.shields.io/nexus/s/https/oss.sonatype.org/org.meeuw.mapping/mapping-annotations.svg[snapshots,link=https://oss.sonatype.org/content/repositories/snapshots/org/meeuw/mapping/]
-//image:https://www.javadoc.io/badge/org.meeuw.mapping/mapping-annotations.svg?color=blue[javadoc,link=https://www.javadoc.io/doc/org.meeuw.mapping/mapping-annotations]
-//image:https://img.shields.io/maven-central/v/org.meeuw.mapping/mapping-annotations.svg?label=Maven%20Central[Maven Central,link=https://central.sonatype.com/artifact/org.meeuw.mapping/mapping-annotations/overview]
+//image:https://img.shields.io/nexus/s/https/oss.sonatype.org/org.beeldengeluid.mapping/mapping-annotations.svg[snapshots,link=https://oss.sonatype.org/content/repositories/snapshots/org/beeldengeluid/mapping/]
+//image:https://www.javadoc.io/badge/org.beeldengeluid.mapping/mapping-annotations.svg?color=blue[javadoc,link=https://www.javadoc.io/doc/org.beeldengeluid.mapping/mapping-annotations]
+//image:https://img.shields.io/maven-central/v/org.beeldengeluid.mapping/mapping-annotations.svg?label=Maven%20Central[Maven Central,link=https://central.sonatype.com/artifact/org.beeldengeluid.mapping/mapping-annotations/overview]
 
 
 Provides an annotation that can be added to fields, indicating how they must be mapped. This makes mapping from source object
@@ -21,7 +21,7 @@ The idea is that it in some mapping implementation it may be handy to annotate f
 [source, java]
 ----
 
-import org.meeuw.mapping.annotations.Source;
+import org.beeldengeluid.mapping.annotations.Source;
 ..
 class DestinationObject {
 
@@ -109,9 +109,9 @@ For now, java records (and probably other readonly structures) are supported if 
 
 [source, java]
 ----
-package org.meeuw.mapping;
+package org.beeldengeluid.mapping;
 
-import org.meeuw.mapping.annotations.Source;
+import org.beeldengeluid.mapping.annotations.Source;
 
 @lombok.Builder
 public record DestinationRecord(
@@ -236,4 +236,8 @@ https://github.com/mihxil/modelmapper-json-source-annotation[This was however my
 == TODO
 
 - Implicit scalar-mapping (may be we can profit from spring conversion? from model mapper?)
+  *  can be done with leaf mapping now
+
 - We may even specify defaults for fields with no `@Source` annotations at all, so that they too get implicitely mappable.
+
+ * `@Source` annotations can also be added at class level
