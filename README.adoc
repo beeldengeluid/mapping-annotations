@@ -153,9 +153,10 @@ For all fields in this class with `@Source` annotations the default value of the
 
 == Leaf mappings
 
-Sometimes it's not feasible to map a suboject entirely by just adding annotations.
+Sometimes it's not feasible to map a subobject entirely by just adding annotations in the destination type.
 
-E.g. a 'json' payload can be pointed to, but automatic unmapping of this is not feasible.
+E.g. a 'json' payload can be easily pointed to, but automatic unmapping of this is not feasible. Several approaches could be followed, but the final fall back can always be to just
+program the last steps ('the leaf') by implementing the (functional) interface `nl.beeldengeluid.mapping.LeafMapper.
 
 In other words, the end of the route to the value ('the leaf') may be a type that does not correspond yet to type of the field where it should be stored in.
 
@@ -164,10 +165,18 @@ The mapper can have custom 'leaf' mappings then:
 [source, java]
 ----
 Mapper mapper = MAPPER.withLeafMapper((mapper, field, value) -> {
-  return <new object of type destiatnionType mapped from incoming o>
+  return <new object of type destination type mapped from incoming object>
 }
-
 ----
+
+For the common case of just specifying the mapper between 2 types there is a version which 3 arguments: the source and destination type and just a `Function`. This can be used
+with a source type 'JsonNode.class', but also scalar types can be further specified, e.g.:
+[source, java]
+----
+Mapper mapper = MAPPER.withLeafMapper(Double.class, Duration.class, (doub) -> Duration.ofNanos((long) (doub * 1_000_000_000L)))
+}
+----
+
 
 
 
