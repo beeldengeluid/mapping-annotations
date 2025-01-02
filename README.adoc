@@ -1,11 +1,11 @@
 = mapping annotations
 :toc:
 
-image:https://github.com/mihxil/mapping-annotations/actions/workflows/maven.yml/badge.svg?[Build Status,link=https://github.com/mihxil/mapping-annotations/actions/workflows/maven.yml]
-image:https://codecov.io/gh/mihxil/mapping-annotations/branch/main/graph/badge.svg[codecov,link=https://codecov.io/gh/mihxil/mapping-annotations]
-image:https://img.shields.io/nexus/s/https/oss.sonatype.org/org.meeuw.mapping/mapping-annotations.svg[snapshots,link=https://oss.sonatype.org/content/repositories/snapshots/org/meeuw/mapping/]
-image:https://www.javadoc.io/badge/org.meeuw.mapping/mapping-annotations.svg?color=blue[javadoc,link=https://www.javadoc.io/doc/org.meeuw.mapping/mapping-annotations]
-image:https://img.shields.io/maven-central/v/org.meeuw.mapping/mapping-annotations.svg?label=Maven%20Central[Maven Central,link=https://central.sonatype.com/artifact/org.meeuw.mapping/mapping-annotations/overview]
+image:https://github.com/beeldengeluid/mapping-annotations/actions/workflows/maven.yml/badge.svg?[Build Status,link=https://github.com/beeldengeluid/mapping-annotations/actions/workflows/maven.yml]
+//image:https://codecov.io/gh/mihxil/mapping-annotations/branch/main/graph/badge.svg[codecov,link=https://codecov.io/gh/mihxil/mapping-annotations]
+//image:https://img.shields.io/nexus/s/https/oss.sonatype.org/org.meeuw.mapping/mapping-annotations.svg[snapshots,link=https://oss.sonatype.org/content/repositories/snapshots/org/meeuw/mapping/]
+//image:https://www.javadoc.io/badge/org.meeuw.mapping/mapping-annotations.svg?color=blue[javadoc,link=https://www.javadoc.io/doc/org.meeuw.mapping/mapping-annotations]
+//image:https://img.shields.io/maven-central/v/org.meeuw.mapping/mapping-annotations.svg?label=Maven%20Central[Maven Central,link=https://central.sonatype.com/artifact/org.meeuw.mapping/mapping-annotations/overview]
 
 
 Provides an annotation that can be added to fields, indicating how they must be mapped. This makes mapping from source object
