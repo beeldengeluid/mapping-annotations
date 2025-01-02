@@ -36,20 +36,9 @@ public class Mapper {
 
     /**
      * The default {@link Mapper} instance. Mappers are stateless, but can contain some configuration.
+     * A new mapper can be constructed using {@link #builder()} or by using {@code with-} methods on an existing one.
      */
     public static final Mapper MAPPER = Mapper.builder().build();
-
-    /**
-     * The Mapper currently effective. A {@link ThreadLocal}. Defaults to {@link #MAPPER}
-     */
-    private static final ThreadLocal<Mapper> CURRENT = ThreadLocal.withInitial(() -> MAPPER);
-
-    /**
-     * @return  The currently in use (thread local) {@link Mapper} instance
-     */
-    public static Mapper current() {
-        return CURRENT.get();
-    }
 
     @With
     @Getter
@@ -93,7 +82,6 @@ public class Mapper {
     }
 
 
-
     /**
      * Maps all fields in {@code destination} that are annotated with a {@link Source} that matched a field in {@code source}
      * @param source The source object
@@ -102,10 +90,8 @@ public class Mapper {
      */
     public void map(Object source, Object destination, Class<?>... groups) {
         try {
-            CURRENT.set(this);
             privateMap(source, destination, destination.getClass(), groups);
         } finally {
-            CURRENT.remove();
             if (clearsJsonCacheEveryTime) {
                 JsonUtil.clearCache();
             }
@@ -166,7 +152,6 @@ public class Mapper {
         return c.computeIfAbsent(sourceClass, cl -> _sourceGetter(destinationClass, destinationField, sourceClass));
 
     }
-
 
 
     public Mapper withLeafMapper(LeafMapper instance) {

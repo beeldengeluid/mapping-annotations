@@ -215,6 +215,8 @@ https://github.com/mihxil/modelmapper-json-source-annotation[This was however my
 |===
 |version | date | remarks
 
+| 0.7 | 2024-12 | refactoring a bit again. Introduced 'leaf mapping'
+
 |0.3
 | ?
 |more caching (of json parsing), made Mapper methods non-static, so Mapper's can be configured. class-level defaults.
