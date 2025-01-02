@@ -22,7 +22,8 @@ public class RecursiveMapper implements LeafMapper {
 
     }
 
+    @Override
     public int weight() {
-        return 100;
+        return 1000;
     }
 }

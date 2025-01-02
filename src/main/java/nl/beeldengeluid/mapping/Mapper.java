@@ -166,6 +166,12 @@ public class Mapper {
 
     public <S, D> Mapper withLeafMapper(Class<S> source, Class<D> destination, Function<S, D> function) {
         return withLeafMapper(new LeafMapper() {
+
+            @Override
+            public int weight() {
+                return 0;
+            }
+            @SuppressWarnings("unchecked")
             @Override
             public Leaf map(Mapper mapper, MappedField destinationField, Object o) {
                 if (destination.isAssignableFrom(destinationField.type()) && source.isInstance(o)) {

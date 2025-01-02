@@ -20,7 +20,7 @@ public interface LeafMapper extends Comparable<LeafMapper> {
 
 
     default int weight() {
-        return 0;
+        return 100;
     }
 
     default int compareTo(LeafMapper leafMapper) {
@@ -32,7 +32,7 @@ public interface LeafMapper extends Comparable<LeafMapper> {
     Leaf NOT_MAPPED = new Leaf(null, false, false);
 
     static Leaf mapped(Object o) {
-        return new Leaf(o, true, false);
+        return new Leaf(o, true, true);
     }
 
     /**
