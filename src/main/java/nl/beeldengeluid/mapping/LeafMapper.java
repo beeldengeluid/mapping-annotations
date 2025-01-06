@@ -16,6 +16,13 @@ public interface LeafMapper extends Comparable<LeafMapper> {
     }
 
 
+    /**
+     * Try to map a leaf object
+     * @param mapper The mapper for which this is happening. It can e.g. be used for 'sub' mappings.
+     * @param destinationField Information about the field the mapped value has to be stored in
+     * @param o The incoming object
+     * @return A {@link Leaf} object describing the result of the mapping process.
+     */
     Leaf map(Mapper mapper, MappedField destinationField, Object o);
 
 

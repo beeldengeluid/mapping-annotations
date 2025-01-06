@@ -72,6 +72,13 @@ public class Mapper {
     }
 
 
+    /**
+     * Support for instantiating new objects.
+     * Currently just calls the default no-args constructor.
+     * @param destinationClass
+     * @return A new object
+     * @param <T>
+     */
 
     public <T> T newInstance(Class<T> destinationClass)  {
         try {
@@ -98,6 +105,19 @@ public class Mapper {
         }
     }
 
+
+    /**
+     * For now just checks whether there is a no args accessible constructor in the destination clas..
+     * If so, that suffices to conclude that this mapper can map to it.
+     * <p>
+     * TODO: This seems too simple? Should the leaf mappers have a say in this or so?
+
+     *
+     * @param source
+     * @param destinationClass
+     * @param groups
+     * @return
+     */
     public boolean canMap(Object source, Class<?> destinationClass, Class<?>... groups) {
         try {
             if (!destinationClass.isInstance(source)) {
@@ -153,6 +173,11 @@ public class Mapper {
     }
 
 
+    /**
+     * Adds a {@link LeafMapper}.
+     * @param instance the leaf mapper to add
+     * @return A copy of the mapper, but with this one extra 'leaf mapper'.
+     */
     public Mapper withLeafMapper(LeafMapper instance) {
         List<LeafMapper> list = new ArrayList<>(leafMappers);
         if (!list.contains(instance)) {
@@ -163,6 +188,16 @@ public class Mapper {
         return this;
     }
 
+    /**
+     * Specify a leaf mapper with a {@link Function} while mapping source and destination on type.
+     * @param source Type of the source object
+     * @param destination Type of the destination object
+     * @param function Function specifying how to map source to destination
+     * @return A new {@link Mapper}
+     * @param <S> The source type
+     * @param <D> The destination type
+     * @see #withLeafMapper(LeafMapper)
+     */
     public <S, D> Mapper withLeafMapper(Class<S> source, Class<D> destination, Function<S, D> function) {
         return withLeafMapper(new LeafMapper() {
 
