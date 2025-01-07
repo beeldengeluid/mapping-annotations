@@ -51,7 +51,7 @@ public class Mapper {
     private final List<LeafMapper> leafMappers = Stream.of(
         UnwrapCollectionsMapper.INSTANCE,
         JaxbMapper.INSTANCE,
-        new EnumMapper(true),
+        new EnumMapper(true, false),
         RecursiveMapper.INSTANCE
         ).sorted().toList();
 
@@ -225,12 +225,12 @@ public class Mapper {
 
     public Mapper withSupportsJaxbAnnotations(Boolean supportsJaxbAnnotations) {
         if (supportsJaxbAnnotations) {
-            return withLeafMapper(new EnumMapper(true))
-                .withoutLeafMapper(new EnumMapper(false))
+            return withLeafMapper(new EnumMapper(true, false))
+                .withoutLeafMapper(new EnumMapper(false, false))
                 .withLeafMapper(JaxbMapper.INSTANCE);
         } else {
-            return withLeafMapper(new EnumMapper(false))
-                .withoutLeafMapper(new EnumMapper(true))
+            return withLeafMapper(new EnumMapper(false, false))
+                .withoutLeafMapper(new EnumMapper(true, false))
                 .withoutLeafMapper(JaxbMapper.INSTANCE);
         }
     }

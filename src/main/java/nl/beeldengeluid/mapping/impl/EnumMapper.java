@@ -22,9 +22,12 @@ public class EnumMapper implements LeafMapper {
 
 
     private final boolean considerXmlEnum;
+    private final boolean caseSensitive;
 
-    public EnumMapper(boolean considerXmlEnum) {
+
+    public EnumMapper(boolean considerXmlEnum, boolean caseSensitive) {
         this.considerXmlEnum = considerXmlEnum;
+        this.caseSensitive = caseSensitive;
     }
 
     @Override
@@ -37,7 +40,7 @@ public class EnumMapper implements LeafMapper {
                     try {
                         Field f = enumConstant.getDeclaringClass().getField(enumConstant.name());
                         XmlEnumValue xmlValue = f.getAnnotation(XmlEnumValue.class);
-                        if (xmlValue != null && xmlValue.value().equals(string)) {
+                        if (xmlValue != null && (caseSensitive ? xmlValue.value().equals(string) : xmlValue.value().equalsIgnoreCase(string))) {
                             return LeafMapper.mapped(enumConstant);
                         }
                     } catch (NoSuchFieldException e) {
@@ -46,7 +49,7 @@ public class EnumMapper implements LeafMapper {
                 }
             }
             for (Enum<?> enumConstant : enumClass.getEnumConstants()) {
-                if (enumConstant.name().equals(string)) {
+                if (caseSensitive ? enumConstant.name().equals(string) : enumConstant.name().equalsIgnoreCase(string)) {
                     return LeafMapper.mapped(enumConstant);
                 }
             }
