@@ -51,7 +51,7 @@ public class Mapper {
     private final List<LeafMapper> leafMappers = Stream.of(
         UnwrapCollectionsMapper.INSTANCE,
         JaxbMapper.INSTANCE,
-        PrimitiveMapper.INSTANCE,
+        ScalarMapper.INSTANCE,
         new EnumMapper(true, false),
         RecursiveMapper.INSTANCE
         ).sorted().toList();
