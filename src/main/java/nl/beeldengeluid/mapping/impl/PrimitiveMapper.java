@@ -21,7 +21,7 @@ public class PrimitiveMapper implements LeafMapper {
 
     @Override
     public Leaf map(Mapper mapper, MappedField destinationField, Object o) {
-        if (CharSequence.class.isAssignableFrom(destinationField.type())) {
+        if (CharSequence.class.isAssignableFrom(destinationField.type()) && ! (o instanceof CharSequence)) {
             return LeafMapper.mapped(o.toString());
         }
         if (Long.class.isAssignableFrom(destinationField.type())) {
