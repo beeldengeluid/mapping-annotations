@@ -1,5 +1,7 @@
 package nl.beeldengeluid.mapping.impl;
 
+import lombok.ToString;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -12,6 +14,7 @@ import nl.beeldengeluid.mapping.MappedField;
 /**
  * @see MappedField
  */
+@ToString
 public class ReflectMappedField implements MappedField {
 
     private final Field field;
