@@ -358,7 +358,7 @@ public class Mapper {
                         Object convertedValue = mapLeaf(f, o);
                         destinationField.set(destination, convertedValue);
                     } catch (Exception e) {
-                        log.warn("When setting '{}' in {}: {}", o, destinationField, e.getMessage());
+                        log.warn("When setting '{}' in {}: {} (because {})", o, destinationField, e.getMessage(), annotation.get());
                     }
                 };
             }
