@@ -53,7 +53,7 @@ public class JaxbMapper implements LeafMapper {
     }
 
     @Override
-    public Leaf map(Mapper mapper, MappedField destinationField, Object o) {
+    public Leaf map(Mapper mapper,EffectiveSource effectiveSource,  MappedField destinationField, Object o) {
         return considerXmlAdapter(o, destinationField);
     }
 }

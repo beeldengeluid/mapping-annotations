@@ -207,7 +207,7 @@ public class Mapper {
                 return 0;
             }
             @Override
-            public Leaf map(Mapper mapper, MappedField destinationField, Object o) {
+            public Leaf map(Mapper mapper, EffectiveSource effectiveSource,  MappedField destinationField, Object o) {
                 if (destination.isAssignableFrom(destinationField.type()) && source.isInstance(o)) {
                     return LeafMapper.mapped(function.apply((S) o));
                 }
@@ -333,14 +333,14 @@ public class Mapper {
     private  BiConsumer<Object, Object> _destinationSetter(Class<?> destinationClass, Field destinationField, Class<?> sourceClass) {
         Optional<EffectiveSource> annotation = getAnnotation(sourceClass, destinationClass, destinationField);
         if (annotation.isPresent()) {
-            EffectiveSource effectiveSource = annotation.get();
+            final EffectiveSource effectiveSource = annotation.get();
             String sourceFieldName = effectiveSource.field();
             if (isJsonField(sourceClass)) {
                 destinationField.setAccessible(true);
                 return (destination, o) -> {
                     try {
                         MappedField f = MappedField.of(destinationField, effectiveSource);
-                        destinationField.set(destination, mapLeaf(f, o));
+                        destinationField.set(destination, mapLeaf(effectiveSource, f, o));
                     } catch (Exception e) {
                         log.warn("When setting {} in {}: {}", o, destinationField, e.getMessage());
                     }
@@ -355,7 +355,7 @@ public class Mapper {
                 return (destination, o) -> {
                     try {
                         MappedField f = MappedField.of(destinationField, effectiveSource);
-                        Object convertedValue = mapLeaf(f, o);
+                        Object convertedValue = mapLeaf(effectiveSource, f, o);
                         destinationField.set(destination, convertedValue);
                     } catch (Exception e) {
                         log.warn("When setting '{}' in {}: {} (because {})", o, destinationField, e.getMessage(), annotation.get());
@@ -367,9 +367,11 @@ public class Mapper {
     }
 
 
-    public Object mapLeaf(MappedField destinationField, Object o) {
-        for (LeafMapper valueMapper : leafMappers) {
-            LeafMapper.Leaf result = valueMapper.map(this, destinationField, o);
+    public Object mapLeaf(EffectiveSource effectiveSource, MappedField destinationField, Object o) {
+        Iterator<LeafMapper> i = Stream.concat(Arrays.stream(effectiveSource.leafMappers()), leafMappers.stream()).iterator();
+
+        while(i.hasNext()) {
+            LeafMapper.Leaf result = i.next().map(this, effectiveSource, destinationField, o);
             if (result.success()) {
                 o = result.result();
                 if (result.terminate()) {

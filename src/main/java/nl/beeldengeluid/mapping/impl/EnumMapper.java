@@ -31,7 +31,7 @@ public class EnumMapper implements LeafMapper {
     }
 
     @Override
-    public Leaf map(Mapper mapper, MappedField destinationField, Object o) {
+    public Leaf map(Mapper mapper, EffectiveSource effectiveSource, MappedField destinationField, Object o) {
 
         if (destinationField.genericType() instanceof  Class<?> c && c.isEnum() && o instanceof String string) {
             Class<Enum<?>> enumClass = (Class<Enum<?>>) c;

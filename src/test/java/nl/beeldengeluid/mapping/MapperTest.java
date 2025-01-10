@@ -124,7 +124,7 @@ class MapperTest {
     void customMapping() {
 
 
-        Mapper mapper = MAPPER.withLeafMapper((m, field, value) -> {
+        Mapper mapper = MAPPER.withLeafMapper((m,  s, field, value) -> {
                 if (value instanceof JsonNode json && field.genericType().equals(SubDestination.class)) {
                     Field f;
                     SubDestination so = new SubDestination();
@@ -153,7 +153,7 @@ class MapperTest {
     @Test
     void customMappingForList() {
 
-        Mapper mapper = MAPPER.withLeafMapper((m, field, value) -> {
+        Mapper mapper = MAPPER.withLeafMapper((m, s, field, value) -> {
             if (value instanceof JsonNode json && field.genericType().equals(SubDestination.class)) {
                 if (json.isObject() && json.has("title") && json.has("description")) {
                     SubDestination so = new SubDestination();
@@ -163,7 +163,7 @@ class MapperTest {
             }
             return LeafMapper.NOT_MAPPED;
 
-        }).withLeafMapper((m, field, value) -> {
+        }).withLeafMapper((m, effectiveSource, field, value) -> {
             if (value instanceof SubDestination s) {
                 if (s.b() == null) {
                     s.b(field.name());
@@ -235,7 +235,7 @@ class MapperTest {
     void customMappingDuration() {
 
 
-        Mapper mapper = MAPPER.withLeafMapper((m, field, value) -> {
+        Mapper mapper = MAPPER.withLeafMapper((m, s, field, value) -> {
                 if (field.genericType().equals(Duration.class)) {
                     if (value instanceof Number number) {
                         return LeafMapper.mapped(Duration.ofMillis(number.longValue()));

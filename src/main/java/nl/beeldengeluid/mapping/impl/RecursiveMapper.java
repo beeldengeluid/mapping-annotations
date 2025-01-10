@@ -14,7 +14,7 @@ public class RecursiveMapper implements LeafMapper {
     }
 
     @Override
-    public Leaf map(Mapper mapper, MappedField destinationField, Object o) {
+    public Leaf map(Mapper mapper, EffectiveSource effectiveSource,  MappedField destinationField, Object o) {
         if (!mapper.canMap(o, destinationField.type())) {
             return LeafMapper.NOT_MAPPED;
         }

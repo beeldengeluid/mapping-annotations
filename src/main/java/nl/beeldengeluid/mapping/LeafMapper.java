@@ -11,8 +11,8 @@ public interface LeafMapper extends Comparable<LeafMapper> {
      * @param o The incoming value to convert
      * @return Leaf o
      */
-    default Leaf map(Mapper mapper, MappedField destinationField, Object o, Class<?>... groups) {
-        return map(mapper, destinationField, o);
+    default Leaf map(Mapper mapper, EffectiveSource effectiveSource, MappedField destinationField, Object o, Class<?>... groups) {
+        return map(mapper, effectiveSource, destinationField, o);
     }
 
 
@@ -23,7 +23,7 @@ public interface LeafMapper extends Comparable<LeafMapper> {
      * @param o The incoming object
      * @return A {@link Leaf} object describing the result of the mapping process.
      */
-    Leaf map(Mapper mapper, MappedField destinationField, Object o);
+    Leaf map(Mapper mapper, EffectiveSource effectiveSource,  MappedField destinationField, Object o);
 
 
     /**

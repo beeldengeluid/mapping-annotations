@@ -23,7 +23,7 @@ public class UnwrapCollectionsMapper implements LeafMapper {
     }
 
     @Override
-    public Leaf map(Mapper mapper, MappedField destinationField, Object possiblyACollection) {
+    public Leaf map(Mapper mapper, EffectiveSource effectiveSource, MappedField destinationField, Object possiblyACollection) {
         if (possiblyACollection instanceof Collection<?> list) {
             if (destinationField.type() == List.class) {
                 ParameterizedType genericType = (ParameterizedType) destinationField.genericType();
@@ -34,9 +34,9 @@ public class UnwrapCollectionsMapper implements LeafMapper {
                                 try {
                                     var m = new MappedFieldImpl(destinationField.name(),
                                         genericClass,
-                                        null
+                                        effectiveSource
                                     );
-                                    Object mapped = mapper.mapLeaf(m, o);
+                                    Object mapped = mapper.mapLeaf(effectiveSource, m, o);
                                     return mapped;
                                 } catch (MapException me) {
                                     log.warn(me.getMessage(), me);

@@ -1,5 +1,6 @@
 package nl.beeldengeluid.mapping;
 
+import java.lang.reflect.*;
 import java.util.Arrays;
 
 import nl.beeldengeluid.mapping.annotations.Source;
@@ -27,7 +28,7 @@ public record EffectiveSource(
 
     String[] path,
 
-    Class<? extends LeafMapper>[] leafMappers
+    LeafMapper[] leafMappers
 
 ) {
 
@@ -69,12 +70,34 @@ public record EffectiveSource(
              builder.path(source.path());
          }
 
-        if (DEFAULTS.leafMappers().equals(source.leafMappers())) {
-            builder.leafMappers(defaults.leafMappers());
+        if (Arrays.equals(DEFAULTS.leafMappers(), source.leafMappers())) {
+            builder.leafMappers(Arrays.stream(defaults.leafMappers())
+                .map(EffectiveSource::instantiateMapper)
+                .toArray(LeafMapper[]::new));
         } else {
-            builder.leafMappers(source.leafMappers());
+            builder.leafMappers(Arrays.stream(source.leafMappers())
+                 .map(EffectiveSource::instantiateMapper)
+                .toArray(LeafMapper[]::new));
         }
 
          return builder.build();
+    }
+
+    public static <T extends LeafMapper> T  instantiateMapper(Class<T> clazz) {
+        try {
+            Constructor<T> constructor = clazz.getConstructor();
+            return constructor.newInstance();
+        } catch (InvocationTargetException | IllegalAccessException | InstantiationException | NoSuchMethodException ignored) {
+
+        }
+        try {
+            Field instance = clazz.getDeclaredField("INSTANCE");
+            if (Modifier.isStatic(instance.getModifiers()) && Modifier.isPublic(instance.getModifiers())) {
+                return (T) instance.get(null);
+            }
+        } catch (NoSuchFieldException | IllegalAccessException ignored) {
+
+        }
+        throw new IllegalStateException("Cannot instantiate  " + clazz);
     }
 }
