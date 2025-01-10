@@ -42,8 +42,12 @@ public interface LeafMapper extends Comparable<LeafMapper> {
 
     Leaf NOT_MAPPED = new Leaf(null, false, false);
 
-    static Leaf mapped(Object o) {
+    static Leaf mappedTerminal(Object o) {
         return new Leaf(o, true, true);
+    }
+
+    static Leaf mapped(Object o) {
+        return new Leaf(o, true, false);
     }
 
     /**
