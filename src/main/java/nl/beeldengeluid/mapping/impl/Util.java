@@ -105,21 +105,6 @@ public class Util {
         if (source == null) {
             return false;
         }
-        if (source.groups().length > 0 && groups.length > 0) {
-            boolean foundMatch = false;
-            OUTER:
-            for (Class<?> group : source.groups()) {
-                for (Class<?> groupOfSource : source.groups()) {
-                    if (group.isAssignableFrom(groupOfSource)) {
-                        foundMatch = true;
-                        break OUTER;
-                    }
-                }
-            }
-            if (!foundMatch) {
-               return false;
-            }
-        }
         String field = source.field();
 
         if (UNSET.equals(field)) {

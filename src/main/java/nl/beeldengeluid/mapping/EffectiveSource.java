@@ -13,7 +13,7 @@ import nl.beeldengeluid.mapping.annotations.Source;
  * @param jsonPointer See {@link Source#jsonPointer()}
  * @param field See {@link Source#field()}
  * @param path See {@link Source#path()}
- * @param groups See {@link Source#groups()}
+ * @param leafMappers See {@link Source#leafMappers()}
  */
 @lombok.Builder
 public record EffectiveSource(
@@ -27,7 +27,8 @@ public record EffectiveSource(
 
     String[] path,
 
-    Class<?>[] groups
+    Class<? extends LeafMapper>[] leafMappers
+
 ) {
 
     @Source
@@ -68,17 +69,12 @@ public record EffectiveSource(
              builder.path(source.path());
          }
 
-        if (Arrays.equals(DEFAULTS.groups(), source.groups())) {
-            builder.groups(defaults.groups());
-         } else {
-             builder.groups(source.groups());
-         }
-/*
-        if (Arrays.equals(DEFAULTS.customMappers(), source.customMappers())) {
-            builder.customMappers(defaults.customMappers());
-         } else {
-             builder.customMappers(source.customMappers());
-         }*/
+        if (DEFAULTS.leafMappers().equals(source.leafMappers())) {
+            builder.leafMappers(defaults.leafMappers());
+        } else {
+            builder.leafMappers(source.leafMappers());
+        }
+
          return builder.build();
     }
 }

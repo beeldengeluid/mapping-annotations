@@ -31,10 +31,7 @@ class MapperTest {
         log.info("{}", destination);
         assertThat(destination.title()).isEqualTo("foobar");
         assertThat(destination.moreJson()).isEqualTo(sourceObject.moreJson());
-
     }
-
-
 
     @Test
     public void test2() {

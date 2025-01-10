@@ -3,6 +3,8 @@
  */
 package nl.beeldengeluid.mapping.annotations;
 
+import nl.beeldengeluid.mapping.LeafMapper;
+
 import java.lang.annotation.*;
 
 /**
@@ -18,6 +20,17 @@ import java.lang.annotation.*;
 public @interface Source {
 
     String UNSET = "#UNSET";
+
+    /**
+     * The source class in with the other field can be found
+     * <p>
+     * Optional, normally just in the source class of the source object
+     * But multiple source annotations can be present, and the one where the sourceClass
+     * matches the actual class of the source object will be used then.
+     * @return a class which match on the actual type of the source object
+     */
+    Class<?> sourceClass() default Object.class;
+
 
     /**
      * Json path inside the other field. If not specified, it may be the entire field
@@ -51,27 +64,8 @@ public @interface Source {
      */
     String[] path() default {};
 
-    /**
-     * The source class in with the other field can be found
-     * <p>
-     * Optional, normally just in the source class of the source object
-     * But multiple source annotations can be present, and the one where the sourceClass
-     * matches the actual class of the source object will be used then.
-     * @return a class which match on the actual type of the source object
-     */
-    Class<?> sourceClass() default Object.class;
+    Class<? extends LeafMapper>[] leafMappers() default {};
 
-
-    /**
-     * Similar to 'groups' in jakarta.validation. The idea is that certain mappings can be disabled/enabled
-     * by specifying groups.
-     *
-     * EXPERIMENTAL
-     * @since 0.2
-     * @return an array of classes, of which at least one {@link Class#isAssignableFrom(Class) is assignable from} one of the incoming groups.
-     */
-
-    Class<?>[] groups() default {};
 
 
 

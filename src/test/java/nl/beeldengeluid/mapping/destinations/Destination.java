@@ -13,8 +13,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import nl.beeldengeluid.mapping.annotations.Source;
-import nl.beeldengeluid.mapping.groups.Test1Class;
-import nl.beeldengeluid.mapping.groups.Test2Class;
+
 import nl.beeldengeluid.mapping.sources.ExtendedSourceObject;
 import nl.beeldengeluid.mapping.sources.SourceObject;
 
@@ -44,10 +43,10 @@ public class Destination {
     @Source(field = "subObject", path="id", sourceClass = ExtendedSourceObject.class)
     Long id;
 
-    @Source(field = "moreJson", jsonPointer ="/nisv.currentbroadcaster", groups = Test1Class.class)
+    @Source(field = "moreJson", jsonPointer ="/nisv.currentbroadcaster")
     List<SubDestinationObject> list;
 
-    @Source(field = "moreJson", jsonPath ="['nisv.currentbroadcaster'][*]['currentbroadcaster.broadcaster']", groups = Test2Class.class)
+    @Source(field = "moreJson", jsonPath ="['nisv.currentbroadcaster'][*]['currentbroadcaster.broadcaster']")
     List<SubDestinationObject> list2;
 
     @Source(field = "json", jsonPointer = "/sub")
