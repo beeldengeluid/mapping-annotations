@@ -13,11 +13,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import nl.beeldengeluid.mapping.annotations.Source;
-import nl.beeldengeluid.mapping.impl.*;
-
 import org.meeuw.functional.Consumers;
 import org.meeuw.functional.TriConsumer;
+
+import nl.beeldengeluid.mapping.annotations.Source;
+import nl.beeldengeluid.mapping.impl.*;
 
 import static nl.beeldengeluid.mapping.annotations.Source.UNSET;
 import static nl.beeldengeluid.mapping.impl.Util.*;
@@ -280,8 +280,9 @@ public class Mapper {
         boolean json = isJson(sourceClass);
         return Optional.of(o -> {
             for (EffectiveSource effectiveSource : annotation) {
+                boolean subJson = !(effectiveSource.jsonPointer().equals(UNSET) && effectiveSource.jsonPath().equals(UNSET));
+
                 if (json) {
-                    boolean subJson = !(effectiveSource.jsonPointer().equals(UNSET) && effectiveSource.jsonPath().equals(UNSET));
                     if (subJson) {
                         Function<Object, Optional<Object>> v = JsonUtil.valueFromJsonGetter(effectiveSource);
                         Optional<Object> value = v.apply(o);
@@ -295,7 +296,14 @@ public class Mapper {
                     final Field sf = sourceField.get();
                     Optional<Object> sourceValue = getSourceValue(o, sf, effectiveSource.path());
                     if (sourceValue.isPresent()) {
-                        return Optional.of(new ValueAndEffectiveSource(effectiveSource, sourceValue.get()));
+                        if (subJson) {
+                            Optional<Object> sourceJsonValue = JsonUtil.getSourceJsonValue(effectiveSource, o, sf, destinationField);
+                            if (sourceJsonValue.isPresent()) {
+                                return sourceJsonValue.map(jval -> new ValueAndEffectiveSource(effectiveSource, jval));
+                            }
+                        } else {
+                            return Optional.of(new ValueAndEffectiveSource(effectiveSource, sourceValue.get()));
+                        }
                     }
                 }
             }
