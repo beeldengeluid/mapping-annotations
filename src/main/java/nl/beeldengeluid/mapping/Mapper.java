@@ -200,18 +200,10 @@ public class Mapper {
      * @see #withLeafMapper(LeafMapper)
      */
     public <S, D> Mapper withLeafMapper(Class<S> source, Class<D> destination, Function<S, D> function) {
-        return withLeafMapper(new LeafMapper() {
-
+        return withLeafMapper(new SimpleLeafMapper<>(source, destination) {
             @Override
-            public int weight() {
-                return 0;
-            }
-            @Override
-            public Leaf map(Mapper mapper, EffectiveSource effectiveSource,  MappedField destinationField, Object o) {
-                if (destination.isAssignableFrom(destinationField.type()) && source.isInstance(o)) {
-                    return LeafMapper.mapped(function.apply((S) o));
-                }
-                return LeafMapper.NOT_MAPPED;
+            protected D map(S source) {
+                return function.apply(source);
             }
         });
     }
