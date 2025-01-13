@@ -27,6 +27,10 @@ public class JaxbMapper implements LeafMapper {
 
 
     private static Leaf considerXmlAdapter(Object o, MappedField destinationField)  {
+        if (destinationField.type().isInstance(o)) {
+            // already mapped!
+            return NOT_MAPPED;
+        }
         Optional<XmlAdapter<?, ?>> adapter = ADAPTERS.computeIfAbsent(destinationField, (field) -> {
             XmlJavaTypeAdapter annotation = field.annotation(XmlJavaTypeAdapter.class);
             if (annotation != null) {
