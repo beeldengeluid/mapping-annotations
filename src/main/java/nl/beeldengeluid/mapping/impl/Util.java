@@ -147,12 +147,12 @@ public class Util {
             return Optional.empty();
     }
 
-    public static Optional<Object> getSourceValue(Object source, String sourceField, String... path) {
+    public static Optional<Object> getSourceValue(Object source, String sourceField, List<String> path) {
          return getSourceField(source.getClass(), sourceField)
              .flatMap(f -> getSourceValue(source, f, path));
     }
 
-    public static Optional<Object> getSourceValue(Object source, Field sourceField, String... path) {
+    public static Optional<Object> getSourceValue(Object source, Field sourceField, List<String> path) {
           try {
               sourceField.setAccessible(true);
               Object value = sourceField.get(source);

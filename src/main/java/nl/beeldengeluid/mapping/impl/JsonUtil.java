@@ -80,15 +80,10 @@ public class JsonUtil {
         }
     }
 
-
-    private static Optional<Object> getSourceJsonValueByPointer(Object source, Field sourceField, String[] path, String pointer) {
+    private static Optional<Object> getSourceJsonValueByPointer(Object source, Field sourceField, List<String> path, String pointer) {
 
          return getSourceJsonValue(source, sourceField, path)
-             .map(jn -> {
-                 JsonNode at = jn.at(pointer);
-
-                 return at;
-             })
+             .map(jn -> jn.at(pointer))
              .map(JsonUtil::unwrapJson);
     }
 
@@ -96,7 +91,7 @@ public class JsonUtil {
     // stuff. Since we know that there is a limited number of JsonPath object caused by us, we just use our hown cache, without any limitations.
     private static final Map<String, JsonPath> JSONPATH_CACHE = new ConcurrentHashMap<>();
 
-    private static Optional<Object> getSourceJsonValueByPath(Object source, Field sourceField, String[] path, String jsonPath) {
+    private static Optional<Object> getSourceJsonValueByPath(Object source, Field sourceField, List<String> path, String jsonPath) {
 
          return getSourceJsonValue(source, sourceField, path)
              .map(jn -> getByJsonPath(jn, jsonPath))
@@ -128,7 +123,7 @@ public class JsonUtil {
         JSON_CACHE.get().clear();
     }
 
-    static Optional<JsonNode> getSourceJsonValue(Object source, Field sourceField, String... path) {
+    static Optional<JsonNode> getSourceJsonValue(Object source, Field sourceField, List<String> path) {
 
         return Util.getSourceValue(source, sourceField, path)
             .map(json -> {

@@ -368,7 +368,7 @@ public class Mapper {
 
 
     public Object mapLeaf(EffectiveSource effectiveSource, MappedField destinationField, Object o) {
-        Iterator<LeafMapper> i = Stream.concat(Arrays.stream(effectiveSource.leafMappers()), leafMappers.stream()).iterator();
+        Iterator<LeafMapper> i = Stream.concat(effectiveSource.leafMappers().stream(), leafMappers.stream()).iterator();
 
         while(i.hasNext()) {
             LeafMapper.Leaf result = i.next().map(this, effectiveSource, destinationField, o);

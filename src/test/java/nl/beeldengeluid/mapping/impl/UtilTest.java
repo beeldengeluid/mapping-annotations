@@ -3,6 +3,7 @@ package nl.beeldengeluid.mapping.impl;
 import lombok.extern.log4j.Log4j2;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ class UtilTest {
    void getSourceValue() {
        SourceObject source = new SourceObject();
        source.moreJson("{'title': 'foobar'}");
-       Optional<Object> moreJson = Util.getSourceValue(source, "moreJson");
+       Optional<Object> moreJson = Util.getSourceValue(source, "moreJson", List.of());
        assertThat(moreJson).contains(source.moreJson());
    }
 
@@ -45,7 +46,7 @@ class UtilTest {
         ExtendedSourceObject source = new ExtendedSourceObject();
         source.moreJson("{'title': 'foobar'}");
 
-        Optional<Object> moreJson = Util.getSourceValue(source, "moreJson");
+        Optional<Object> moreJson = Util.getSourceValue(source, "moreJson", List.of());
         assertThat(moreJson).contains(source.moreJson());
     }
     @Test
@@ -54,7 +55,7 @@ class UtilTest {
         source.subObject(new SubSourceObject(123L));
 
 
-        Optional<Object> id = Util.getSourceValue(source, "subObject", "id");
+        Optional<Object> id = Util.getSourceValue(source, "subObject", List.of("id"));
         assertThat(id).contains(123L);
     }
 

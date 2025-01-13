@@ -2,6 +2,7 @@ package nl.beeldengeluid.mapping;
 
 import java.lang.reflect.*;
 import java.util.Arrays;
+import java.util.List;
 
 import nl.beeldengeluid.mapping.annotations.Source;
 
@@ -26,9 +27,9 @@ public record EffectiveSource(
 
     String field,
 
-    String[] path,
+    List<String> path,
 
-    LeafMapper[] leafMappers
+    List<? extends LeafMapper> leafMappers
 
 ) {
 
@@ -65,19 +66,20 @@ public record EffectiveSource(
         }
 
          if (Arrays.equals(DEFAULTS.path(), source.path())) {
-             builder.path(defaults.path());
+             builder.path(List.of(defaults.path()));
          } else {
-             builder.path(source.path());
+             builder.path(List.of(source.path()));
          }
 
         if (Arrays.equals(DEFAULTS.leafMappers(), source.leafMappers())) {
-            builder.leafMappers(Arrays.stream(defaults.leafMappers())
+            List<? extends LeafMapper> list = Arrays.stream(defaults.leafMappers())
                 .map(EffectiveSource::instantiateMapper)
-                .toArray(LeafMapper[]::new));
+                .toList();
+            builder.leafMappers(list);
         } else {
             builder.leafMappers(Arrays.stream(source.leafMappers())
                  .map(EffectiveSource::instantiateMapper)
-                .toArray(LeafMapper[]::new));
+                .toList());
         }
 
          return builder.build();
