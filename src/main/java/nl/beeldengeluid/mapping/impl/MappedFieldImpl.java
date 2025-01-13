@@ -3,6 +3,7 @@ package nl.beeldengeluid.mapping.impl;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
+import java.util.List;
 import java.util.Optional;
 
 import nl.beeldengeluid.mapping.EffectiveSource;
@@ -14,7 +15,7 @@ import nl.beeldengeluid.mapping.MappedField;
  * @param genericType
  * @param effectiveSource
  */
-public record MappedFieldImpl(String name, Type genericType,  EffectiveSource effectiveSource) implements MappedField {
+public record MappedFieldImpl(String name, Type genericType,  List<EffectiveSource> effectiveSource) implements MappedField {
 
 
     @Override
@@ -23,7 +24,7 @@ public record MappedFieldImpl(String name, Type genericType,  EffectiveSource ef
     }
 
     @Override
-    public Optional<EffectiveSource> source() {
-        return Optional.ofNullable(effectiveSource);
+    public List<EffectiveSource> source() {
+        return effectiveSource;
     }
 }

@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.lang.reflect.Field;
+import java.util.List;
 
 import jakarta.xml.bind.annotation.XmlEnumValue;
 

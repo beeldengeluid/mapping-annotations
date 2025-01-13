@@ -1,5 +1,6 @@
 package nl.beeldengeluid.mapping;
 
+import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
 
 import java.lang.reflect.Field;
@@ -281,6 +282,45 @@ class MapperTest {
         //assertThat(destination.subObject().b()).isEqualTo("bar");
 
     }
+
+    @Test
+    public void multipleSourcesA() {
+        SourceObject source = new SourceObject();
+        source.moreJson("""
+            {
+              "a": "x"
+            }
+            """);
+        {
+            MultipleSources destination = MAPPER.map(source, MultipleSources.class);
+            assertThat(destination.a).isEqualTo("x");
+        }
+    }
+    @Test
+    public void multipleSourcesB() {
+        SourceObject source = new SourceObject();
+        source.moreJson("""
+          {
+            "b": "y"
+          }
+          """);
+        {
+            MultipleSources destination = MAPPER.map(source, MultipleSources.class);
+            assertThat(destination.a).isEqualTo("y");
+        }
+        source.moreJson("""
+          {
+            "a": "x",
+            "b": "y"
+          }
+          """);
+        {
+            MultipleSources destination = MAPPER.map(source, MultipleSources.class);
+            assertThat(destination.a).isEqualTo("x");
+        }
+
+    }
+
 
 
 }

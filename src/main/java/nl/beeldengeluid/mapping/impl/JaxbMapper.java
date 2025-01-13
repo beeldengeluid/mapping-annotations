@@ -2,8 +2,7 @@ package nl.beeldengeluid.mapping.impl;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
@@ -57,7 +56,7 @@ public class JaxbMapper implements LeafMapper {
     }
 
     @Override
-    public Leaf map(Mapper mapper,EffectiveSource effectiveSource,  MappedField destinationField, Object o) {
+    public Leaf map(Mapper mapper, EffectiveSource effectiveSource, MappedField destinationField, Object o) {
         return considerXmlAdapter(o, destinationField);
     }
 }

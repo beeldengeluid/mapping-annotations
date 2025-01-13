@@ -1,20 +1,12 @@
 package nl.beeldengeluid.mapping;
 
+import java.util.List;
+
 /**
  * At the end of the mapping process, the actual found value can be mapped. All kind of strategies can be though of. That's why it is pluggable.
  */
 @FunctionalInterface
 public interface LeafMapper extends Comparable<LeafMapper> {
-
-    /**
-     * @param destinationField The field the converted value will be stored in
-     * @param o The incoming value to convert
-     * @return Leaf o
-     */
-    default Leaf map(Mapper mapper, EffectiveSource effectiveSource, MappedField destinationField, Object o, Class<?>... groups) {
-        return map(mapper, effectiveSource, destinationField, o);
-    }
-
 
     /**
      * Try to map a leaf object
@@ -51,7 +43,7 @@ public interface LeafMapper extends Comparable<LeafMapper> {
     }
 
     /**
-     * The result of a {@link #map(Mapper, MappedField, Object)}
+     * The result of a {@link #map(Mapper, EffectiveSource, MappedField, Object)}
      * An object combined with a boolean 'success', indication whether the
      * {@link LeafMapper} indeed succeeded mapping the source value to something
      * better.

@@ -34,9 +34,9 @@ public class UnwrapCollectionsMapper implements LeafMapper {
                                 try {
                                     var m = new MappedFieldImpl(destinationField.name(),
                                         genericClass,
-                                        effectiveSource
+                                        List.of(effectiveSource)
                                     );
-                                    Object mapped = mapper.mapLeaf(effectiveSource, m, o);
+                                    Object mapped = mapper.mapLeaf(m, effectiveSource, o);
                                     return mapped;
                                 } catch (MapException me) {
                                     log.warn(me.getMessage(), me);
