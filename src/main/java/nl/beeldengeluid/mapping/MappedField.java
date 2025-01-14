@@ -2,12 +2,13 @@ package nl.beeldengeluid.mapping;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.util.List;
 import java.util.Optional;
 
 import nl.beeldengeluid.mapping.impl.ReflectMappedField;
 
 /**
- * Representation of a mapped field. The most basic implentation is {@link ReflectMappedField} which just wraps an actual {@link Field}.
+ * Representation of a mapped field. The most basic implementation is {@link ReflectMappedField} which just wraps an actual {@link Field}.
  * But sometimes a field is kind of 'virtual', e.g. entries in a collection. In that case {@link nl.beeldengeluid.mapping.impl.MappedFieldImpl} is used.
  */
 public interface MappedField {
@@ -29,7 +30,7 @@ public interface MappedField {
     <T extends Annotation>  T annotation(Class<T> annotation);
 
 
-    Optional<EffectiveSource> source();
+    EffectiveSource source();
 
     //<T extends Annotation>  T annotation(Class<T> annotation);
 

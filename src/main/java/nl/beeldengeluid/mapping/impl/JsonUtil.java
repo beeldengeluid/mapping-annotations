@@ -56,16 +56,21 @@ public class JsonUtil {
 
         .build();
 
-    static Optional<Object> getSourceValueFromJson(Object source, Class<?> destinationClass, Field destination, List<String> path, Class<?>... groups) {
-        EffectiveSource annotation = getAnnotation(source.getClass(), destinationClass, destination, groups).orElseThrow();
-        String field = annotation.field();
-        if (UNSET.equals(field)) {
-            field = destination.getName();
-        }
-        Field sourceField = Util.getSourceField(source.getClass(), field).orElseThrow();
-        log.debug("Found source field {}", sourceField);
+    static Optional<Object> getSourceValueFromJson(Object source, Class<?> destinationClass, Field destination, List<String> path) {
+        for (EffectiveSource annotation : getAnnotation(source.getClass(), destinationClass, destination)) {
+            String field = annotation.field();
+            if (UNSET.equals(field)) {
+                field = destination.getName();
+            }
+            Field sourceField = Util.getSourceField(source.getClass(), field).orElseThrow();
+            log.debug("Found source field {}", sourceField);
 
-        return getSourceJsonValue(annotation, source, sourceField, destination);
+            Optional<Object> p =  getSourceJsonValue(annotation, source, sourceField, destination);
+            if (p.isPresent()) {
+                return p;
+            }
+        }
+        return Optional.empty();
 
     }
 

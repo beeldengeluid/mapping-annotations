@@ -2,8 +2,7 @@ package nl.beeldengeluid.mapping.impl;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
@@ -17,13 +16,13 @@ import nl.beeldengeluid.mapping.*;
  * and has some custom mapping at a leaf, then this can just be profited from with this.
  */
 @Slf4j
-public class JaxbMapper implements LeafMapper {
+public class JaxbLeafMapper implements LeafMapper {
 
     private static final Map<MappedField, Optional<XmlAdapter<?, ?>>> ADAPTERS = new ConcurrentHashMap<>();
 
-    private JaxbMapper() {}
+    private JaxbLeafMapper() {}
 
-    public static final JaxbMapper INSTANCE = new JaxbMapper();
+    public static final JaxbLeafMapper INSTANCE = new JaxbLeafMapper();
 
 
     private static Leaf considerXmlAdapter(Object o, MappedField destinationField)  {
@@ -57,7 +56,7 @@ public class JaxbMapper implements LeafMapper {
     }
 
     @Override
-    public Leaf map(Mapper mapper,EffectiveSource effectiveSource,  MappedField destinationField, Object o) {
+    public Leaf map(Mapper mapper, EffectiveSource effectiveSource, MappedField destinationField, Object o) {
         return considerXmlAdapter(o, destinationField);
     }
 }

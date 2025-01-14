@@ -1,5 +1,7 @@
 package nl.beeldengeluid.mapping;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 public abstract  class SimpleLeafMapper<S, D> implements LeafMapper {
@@ -19,12 +21,15 @@ public abstract  class SimpleLeafMapper<S, D> implements LeafMapper {
         return 0;
     }
     @Override
-    public Leaf map(Mapper mapper, EffectiveSource effectiveSource,  MappedField destinationField, Object o) {
+    public Leaf map(Mapper mapper, EffectiveSource effectiveSource, MappedField destinationField, Object o) {
         if (destination.isAssignableFrom(destinationField.type()) && source.isInstance(o)) {
-            return LeafMapper.mapped(map((S) o));
+            Optional<D> optionalD = map(effectiveSource, (S) o);
+            if (optionalD.isPresent()) {
+                return LeafMapper.mapped(optionalD.get());
+            }
         }
         return LeafMapper.NOT_MAPPED;
     }
 
-    protected abstract D map(S source);
+    protected abstract Optional<D> map(EffectiveSource effectiveSource, S source);
 }

@@ -32,8 +32,7 @@ public class Util {
     }
 
 
-
-    public static Optional<EffectiveSource> getAnnotation(Class<?> sourceClass, Class<?> destinationClass, Field destinationField, Class<?>... groups) {
+    public static List<EffectiveSource> getAnnotation(Class<?> sourceClass, Class<?> destinationClass, Field destinationField) {
 
         destinationField =  associatedBuilderField(destinationField).orElse(destinationField);
         Source defaultValues = null;
@@ -44,22 +43,20 @@ public class Util {
                 clazz = clazz.getSuperclass();
             }
         }
-        EffectiveSource s = null;
+        List<EffectiveSource> list = new ArrayList<>();
         for (Source annotation : getAllSourceAnnotations(destinationField)) {
             EffectiveSource proposal =  EffectiveSource.of(annotation, defaultValues);
-            if (matches(proposal, sourceClass, destinationField.getName(), groups)) {
-                if (s == null) {
-                    s = proposal;
-                } else {
-                    if (s.sourceClass().isAssignableFrom(proposal.sourceClass())) {
-                        // this means proposal is more specific
-                        s = proposal;
-                    }
-                }
+            if (proposal.field().equals(UNSET)) {
+                log.info("No source field set for {} {}. May default to {}", destinationField, proposal, destinationField.getName());
+            }
+            if (matches(proposal, sourceClass, destinationField.getName())) {
+                list.add(proposal);
+            } else {
+                log.debug("Not matching {}", proposal);
             }
         }
 
-        return Optional.ofNullable(s);
+        return Collections.unmodifiableList(list);
     }
 
     public static List<Source> getAllSourceAnnotations(AnnotatedElement destField) {
@@ -95,7 +92,7 @@ public class Util {
         return Optional.empty();
     }
 
-    public static boolean isJsonField(Class<?> clazz) {
+    public static boolean isJson(Class<?> clazz) {
         return JsonNode.class.isAssignableFrom(clazz);
 
     }
@@ -108,7 +105,7 @@ public class Util {
         String field = source.field();
 
         if (UNSET.equals(field)) {
-            if (isJsonField(sourceClass))  {
+            if (isJson(sourceClass))  {
                 return true;
             } else {
                 field = destinationField;
@@ -164,7 +161,7 @@ public class Util {
                   }
               }
               return Optional.ofNullable(value);
-          } catch (IllegalAccessException | NoSuchFieldException e) {
+          } catch (IllegalAccessException | NoSuchFieldException  | IllegalArgumentException e) {
               log.warn(e.getMessage());
               return Optional.empty();
           }

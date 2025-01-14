@@ -5,6 +5,7 @@ import lombok.ToString;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Optional;
 
 import nl.beeldengeluid.mapping.EffectiveSource;
@@ -36,8 +37,8 @@ public class ReflectMappedField implements MappedField {
     }
 
     @Override
-    public Optional<EffectiveSource> source() {
-        return Optional.ofNullable(source);
+    public EffectiveSource source() {
+        return source;
     }
 
     @Override

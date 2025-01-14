@@ -5,11 +5,11 @@ import nl.beeldengeluid.mapping.*;
 /**
  * A leaf mapper that actually calls {@link Mapper} again on the leaf.
  */
-public class RecursiveMapper implements LeafMapper {
+public class RecursiveLeafMapper implements LeafMapper {
 
-    public static final RecursiveMapper INSTANCE = new RecursiveMapper();
+    public static final RecursiveLeafMapper INSTANCE = new RecursiveLeafMapper();
 
-    private RecursiveMapper() {
+    private RecursiveLeafMapper() {
 
     }
 
