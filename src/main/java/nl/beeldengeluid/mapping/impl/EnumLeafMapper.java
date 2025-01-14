@@ -4,7 +4,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.lang.reflect.Field;
-import java.util.List;
 
 import jakarta.xml.bind.annotation.XmlEnumValue;
 
@@ -19,14 +18,14 @@ import nl.beeldengeluid.mapping.*;
  */
 @Getter
 @EqualsAndHashCode
-public class EnumMapper implements LeafMapper {
+public class EnumLeafMapper implements LeafMapper {
 
 
     private final boolean considerXmlEnum;
     private final boolean caseSensitive;
 
 
-    public EnumMapper(boolean considerXmlEnum, boolean caseSensitive) {
+    public EnumLeafMapper(boolean considerXmlEnum, boolean caseSensitive) {
         this.considerXmlEnum = considerXmlEnum;
         this.caseSensitive = caseSensitive;
     }

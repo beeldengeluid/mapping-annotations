@@ -16,13 +16,13 @@ import nl.beeldengeluid.mapping.*;
  * and has some custom mapping at a leaf, then this can just be profited from with this.
  */
 @Slf4j
-public class JaxbMapper implements LeafMapper {
+public class JaxbLeafMapper implements LeafMapper {
 
     private static final Map<MappedField, Optional<XmlAdapter<?, ?>>> ADAPTERS = new ConcurrentHashMap<>();
 
-    private JaxbMapper() {}
+    private JaxbLeafMapper() {}
 
-    public static final JaxbMapper INSTANCE = new JaxbMapper();
+    public static final JaxbLeafMapper INSTANCE = new JaxbLeafMapper();
 
 
     private static Leaf considerXmlAdapter(Object o, MappedField destinationField)  {

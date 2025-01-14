@@ -13,9 +13,9 @@ import nl.beeldengeluid.mapping.MappedField;
  * @see MappedField
  * @param name
  * @param genericType
- * @param effectiveSource
+ * @param source Effective Source
  */
-public record MappedFieldImpl(String name, Type genericType,  List<EffectiveSource> effectiveSource) implements MappedField {
+public record MappedFieldImpl(String name, Type genericType,  EffectiveSource source) implements MappedField {
 
 
     @Override
@@ -23,8 +23,4 @@ public record MappedFieldImpl(String name, Type genericType,  List<EffectiveSour
         return null;
     }
 
-    @Override
-    public List<EffectiveSource> source() {
-        return effectiveSource;
-    }
 }

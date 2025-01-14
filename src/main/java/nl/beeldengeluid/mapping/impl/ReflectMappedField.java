@@ -19,9 +19,9 @@ import nl.beeldengeluid.mapping.MappedField;
 public class ReflectMappedField implements MappedField {
 
     private final Field field;
-    private final List<EffectiveSource> source;
+    private final EffectiveSource source;
 
-    public ReflectMappedField(Field field, List<EffectiveSource> effectiveSource) {
+    public ReflectMappedField(Field field, EffectiveSource effectiveSource) {
         this.field = field;
         this.source = effectiveSource;
     }
@@ -37,7 +37,7 @@ public class ReflectMappedField implements MappedField {
     }
 
     @Override
-    public List<EffectiveSource> source() {
+    public EffectiveSource source() {
         return source;
     }
 

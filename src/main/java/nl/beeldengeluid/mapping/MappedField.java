@@ -30,11 +30,11 @@ public interface MappedField {
     <T extends Annotation>  T annotation(Class<T> annotation);
 
 
-    List<EffectiveSource> source();
+    EffectiveSource source();
 
     //<T extends Annotation>  T annotation(Class<T> annotation);
 
-    static MappedField of (Field field, List<EffectiveSource> source){
+    static MappedField of (Field field, EffectiveSource source){
         return new ReflectMappedField(field, source);
     }
 

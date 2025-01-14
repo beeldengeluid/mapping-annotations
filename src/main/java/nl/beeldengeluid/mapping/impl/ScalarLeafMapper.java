@@ -15,13 +15,13 @@ import nl.beeldengeluid.mapping.*;
  */
 @Getter
 @EqualsAndHashCode
-public class ScalarMapper implements LeafMapper {
+public class ScalarLeafMapper implements LeafMapper {
 
-    public static final ScalarMapper INSTANCE = new ScalarMapper();
+    public static final ScalarLeafMapper INSTANCE = new ScalarLeafMapper();
 
 
 
-    private ScalarMapper() {
+    private ScalarLeafMapper() {
     }
 
     @Override

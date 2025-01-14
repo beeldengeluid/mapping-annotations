@@ -6,7 +6,6 @@ package nl.beeldengeluid.mapping;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,8 +13,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.meeuw.functional.Consumers;
-import org.meeuw.functional.TriConsumer;
+import org.meeuw.functional.*;
 
 import nl.beeldengeluid.mapping.annotations.Source;
 import nl.beeldengeluid.mapping.impl.*;
@@ -24,10 +22,10 @@ import static nl.beeldengeluid.mapping.annotations.Source.UNSET;
 import static nl.beeldengeluid.mapping.impl.Util.*;
 
 /**
- * Utilities to do the actual mapping using {@link Source}
+ * Utility to do the actual mapping using {@link Source}
  * A {@code Mappper} is thread safe. It only contains (unmodifiable) configuration.
  * <p>
- * New mappers (with different configuration) can be created using {@link #builder()} or using 'withers' ({@link #withClearsJsonCacheEveryTime(boolean)} (boolean)}) from an existing one.
+ * New mappers (with different configuration) can be created using {@link #builder()} or using 'withers' (e.g. {@link #withClearsJsonCacheEveryTime(boolean)} or, {@link #withLeafMapper(Class, Class, BiFunction)}) from an existing one.
  *
  * @author Michiel Meeuwissen
  * @since 0.1
@@ -48,16 +46,21 @@ public class Mapper {
     private final boolean clearsJsonCacheEveryTime;
 
 
+    /**
+     * The leaf mappers of this Mapper. An unmodifiable and sorted list of them.
+     *
+     */
     @With(AccessLevel.PACKAGE)
     @lombok.Builder.Default
     @Getter
     private final List<LeafMapper> leafMappers = Stream.of(
-        UnwrapCollectionsMapper.INSTANCE,
-        JaxbMapper.INSTANCE,
-        ScalarMapper.INSTANCE,
-        new EnumMapper(true, false),
-        RecursiveMapper.INSTANCE
-        ).sorted().toList();
+        UnwrapCollectionsLeafMapper.INSTANCE,
+        JaxbLeafMapper.INSTANCE,
+        ScalarLeafMapper.INSTANCE,
+        new EnumLeafMapper(true, false),
+        RecursiveLeafMapper.INSTANCE
+        ).sorted() // LeafMappers are comparable on
+        .toList();
 
 
     /**
@@ -92,7 +95,6 @@ public class Mapper {
         }
     }
 
-
     /**
      * Maps all fields in {@code destination} that are annotated with a {@link Source} that matched a field in {@code source}
      * @param source The source object
@@ -110,12 +112,10 @@ public class Mapper {
 
 
     /**
-     * For now just checks whether there is a no args accessible constructor in the destination clas..
+     * For now just checks whether there is a no args accessible constructor in the destination class.
      * If so, that suffices to conclude that this mapper can map to it.
      * <p>
      * TODO: This seems too simple? Should the leaf mappers have a say in this or so?
-
-     *
      * @param source
      * @param destinationClass
      * @param groups
@@ -124,16 +124,17 @@ public class Mapper {
     public boolean canMap(Object source, Class<?> destinationClass, Class<?>... groups) {
         try {
             if (!destinationClass.isInstance(source)) {
-                Constructor<?> declaredConstructor = destinationClass.getDeclaredConstructor();
+                destinationClass.getDeclaredConstructor();
                 return true;
             }
         } catch (ReflectiveOperationException e) {
+            log.debug("No declared constructor found for {} ({})", destinationClass.getName(), e.getMessage());
         }
         return false;
     }
 
     /**
-     * Just like {@link #map(Object, Object)}, but for example the json cache will not be cleared (if {@link #clearsJsonCacheEveryTime}). This is basically meant to be called by sub mappings.
+     * Just like {@link #map(Object, Object)}, but for example the json cache will not be cleared (if {@link #clearsJsonCacheEveryTime}). This is basically meant to be called by {@link RecursiveLeafMapper sub mappings}
      * @param source The source object
      * @param destination The destination object
      */
@@ -156,19 +157,6 @@ public class Mapper {
             getAnnotation(sourceClass, destinationClass, field).forEach(a -> result.put(field.getName(), field));
         }
         return Collections.unmodifiableMap(result);
-    }
-
-    /**
-     * Returns a function that will use reflection get the value from a source object that maps to the destination field.
-     *
-     * @param sourceClass      Class of a source object
-     * @param destinationField Field of the destination
-     * @param destinationClass Field of the destination
-     */
-    public Optional<Function<Object, Optional<ValueAndEffectiveSource>>> sourceGetter(Class<?> sourceClass, Field destinationField, Class<?> destinationClass) {
-        Map<Class<?>, Optional<Function<Object, Optional<ValueAndEffectiveSource>>>> c = GETTER_CACHE.computeIfAbsent(destinationField, (fi) -> new ConcurrentHashMap<>());
-        return c.computeIfAbsent(sourceClass, cl -> _sourceGetter(destinationClass, destinationField, sourceClass));
-
     }
 
 
@@ -225,25 +213,76 @@ public class Mapper {
 
     public Mapper withSupportsJaxbAnnotations(Boolean supportsJaxbAnnotations) {
         if (supportsJaxbAnnotations) {
-            return withLeafMapper(new EnumMapper(true, false))
-                .withoutLeafMapper(new EnumMapper(false, false))
-                .withLeafMapper(JaxbMapper.INSTANCE);
+            return withLeafMapper(new EnumLeafMapper(true, false))
+                .withoutLeafMapper(new EnumLeafMapper(false, false))
+                .withLeafMapper(JaxbLeafMapper.INSTANCE);
         } else {
-            return withLeafMapper(new EnumMapper(false, false))
-                .withoutLeafMapper(new EnumMapper(true, false))
-                .withoutLeafMapper(JaxbMapper.INSTANCE);
+            return withLeafMapper(new EnumLeafMapper(false, false))
+                .withoutLeafMapper(new EnumLeafMapper(true, false))
+                .withoutLeafMapper(JaxbLeafMapper.INSTANCE);
         }
     }
 
+    /**
+     * Performs the actual 'leaf mapping'
+     * @param destinationField
+     * @param effectiveSource
+     * @param o
+     * @return
+     */
+    public Optional<Object> mapLeaf(MappedField destinationField, EffectiveSource effectiveSource, Object o) {
+
+        Optional<Object> returnValue = Optional.empty();
+        for (LeafMapper lm : effectiveSource.leafMappers()) {
+            LeafMapper.Leaf result = lm.map(this, effectiveSource, destinationField, o);
+            if (result.success()) {
+                o = result.result();
+                returnValue = Optional.of(o);
+                if (result.terminate()) {
+                    return returnValue;
+                }
+            }
+        }
+        for (LeafMapper leafMapper : leafMappers) {
+            LeafMapper.Leaf result = leafMapper.map(this, effectiveSource, destinationField, o);
+            if (result.success()) {
+                o = result.result();
+                returnValue = Optional.of(o);
+                if (result.terminate()) {
+                    break;
+                }
+            }
+        }
+        return returnValue;
+    }
+
+
     ///  PRIVATE METHODS
+    ///
+    ///
+    /**
+     * Returns a function that will use reflection get the value from a source object that maps to the destination field.
+     *
+     * @param sourceClass      Class of a source object
+     * @param destinationField Field of the destination
+     * @param destinationClass Field of the destination
+     * @return A list of functions that can produes optionals of {@link ValueAndEffectiveSource}
+     */
+    protected List<? extends Function<Object, Optional<ValueAndEffectiveSource>>> sourceGetter(Class<?> sourceClass, Class<?> destinationClass, Field destinationField) {
+        Map<Class<?>, List<? extends Function<Object, Optional<ValueAndEffectiveSource>>>> c = GETTER_CACHE.computeIfAbsent(destinationField, (fi) -> new ConcurrentHashMap<>());
+        return c.computeIfAbsent(sourceClass, cl -> _sourceGetter(sourceClass, destinationClass, destinationField));
+
+    }
+
+
 
     /**
      * Helper method for {@link #map(Object, Object)}, recursively called for the class and superclass of the destination
      * object.
      */
     private void privateMap(Object source, Object destination, Class<?> forClass) {
-        Class<?> sourceClass = source.getClass();
-        Class<?> superClass = forClass.getSuperclass();
+        final Class<?> sourceClass = source.getClass();
+        final Class<?> superClass = forClass.getSuperclass();
         if (superClass != null) {
             privateMap(source, destination, superClass);
         }
@@ -255,153 +294,140 @@ public class Mapper {
 
     /**
      * For a field in the destination object, try to get value from the source, and set
-     * this value in destination. Or do nohting if there is no match found
+     * this value in destination. Or do nothing if there is no match found
      */
     private void getAndSet(
         Field destinationField,
         Class<?> sourceClass,
-        Object source,
+        Object sourceObject,
         Object destination) {
-        Optional<Function<Object, Optional<ValueAndEffectiveSource>>> getter = sourceGetter(sourceClass, destinationField, destination.getClass());
 
-        if (getter.isPresent()) {
-            Optional<ValueAndEffectiveSource> value = getter.get().apply(source);
-            value.ifPresentOrElse(v ->
-                    destinationSetter(destination.getClass(), destinationField, sourceClass).accept(v.effectiveSource, destination, v.value),
-                () -> log.debug("No field found for {} ({}) {}", destinationField.getName(), getAllSourceAnnotations(destinationField), sourceClass));
+        List<? extends Function<Object, Optional<ValueAndEffectiveSource>>> getters = sourceGetter(sourceClass,  destination.getClass(), destinationField);
+
+        Object determinedValue = null;
+        for (Function<Object, Optional<ValueAndEffectiveSource>> getter : getters) {
+            Optional<ValueAndEffectiveSource> value = getter.apply(sourceObject);
+            if (value.isPresent()) {
+                ValueAndEffectiveSource result = value.get();
+                var function = destinationValueGetter(destination.getClass(), destinationField, sourceClass);
+                Optional<Object> v = function.apply(result.effectiveSource, destination, result.value);
+                determinedValue = v.orElseGet(() -> value.get().value);
+            }
+        }
+        if (determinedValue != null) {
+            try {
+                destinationField.setAccessible(true);
+                destinationField.set(destination, determinedValue);
+            } catch (IllegalArgumentException iae) {
+                log.debug("Cannot set {} in {}", determinedValue, destinationField);
+            } catch (IllegalAccessException e) {
+                log.warn(e.getMessage());
+            }
         } else {
             log.debug("Ignored destination field {} (No (matching) @Source annotation for {})", destinationField, sourceClass);
         }
     }
 
 
-    private final Map<Field, Map<Class<?>, Optional<Function<Object, Optional<ValueAndEffectiveSource>>>>> GETTER_CACHE = new ConcurrentHashMap<>();
+    private final Map<Field, Map<Class<?>, List<? extends Function<Object, Optional<ValueAndEffectiveSource>>>>> GETTER_CACHE = new ConcurrentHashMap<>();
 
 
 
     /**
      * Uncached version of {@link #sourceGetter(Class, Field, Class)}
      */
-    private Optional<Function<Object, Optional<ValueAndEffectiveSource>>> _sourceGetter(Class<?> destinationClass, Field destinationField, Class<?> sourceClass) {
-        List<EffectiveSource> annotation = getAnnotation(sourceClass, destinationClass, destinationField);
-        if (annotation.isEmpty()) {
-            return Optional.empty();
-        }
-        boolean json = isJson(sourceClass);
-        return Optional.of(o -> {
-            for (EffectiveSource effectiveSource : annotation) {
-                boolean subJson = !(effectiveSource.jsonPointer().equals(UNSET) && effectiveSource.jsonPath().equals(UNSET));
+    private List<? extends Function<Object, Optional<ValueAndEffectiveSource>>> _sourceGetter(Class<?> sourceClass,  Class<?> destinationClass, Field destinationField) {
+        final boolean json = isJson(sourceClass);
+        return getAnnotation(sourceClass, destinationClass, destinationField)
+            .stream()
+            .map(effectiveSource -> new Function<Object, Optional<ValueAndEffectiveSource>>() {
+                @Override
+                public Optional<ValueAndEffectiveSource> apply(Object o) {
 
-                if (json) {
-                    if (subJson) {
-                        Function<Object, Optional<Object>> v = JsonUtil.valueFromJsonGetter(effectiveSource);
-                        Optional<Object> value = v.apply(o);
-                        if (value.isPresent()) {
-                            return Optional.of(new ValueAndEffectiveSource(effectiveSource, value.get()));
-                        }
+                    String sourceFieldName = effectiveSource.field();
+                    if (sourceFieldName.equals(UNSET)) {
+                        sourceFieldName = destinationField.getName();
                     }
-                }
-                Optional<Field> sourceField = getSourceField(sourceClass, effectiveSource.field());
-                if (sourceField.isPresent()) {
-                    final Field sf = sourceField.get();
-                    Optional<Object> sourceValue = getSourceValue(o, sf, effectiveSource.path());
-                    if (sourceValue.isPresent()) {
+                    boolean subJson = !(effectiveSource.jsonPointer().equals(UNSET) && effectiveSource.jsonPath().equals(UNSET));
+
+                    if (json) {
                         if (subJson) {
-                            Optional<Object> sourceJsonValue = JsonUtil.getSourceJsonValue(effectiveSource, o, sf, destinationField);
-                            if (sourceJsonValue.isPresent()) {
-                                return sourceJsonValue.map(jval -> new ValueAndEffectiveSource(effectiveSource, jval));
+                            Function<Object, Optional<Object>> v = JsonUtil.valueFromJsonGetter(effectiveSource);
+                            Optional<Object> value = v.apply(o);
+                            if (value.isPresent()) {
+                                return Optional.of(new ValueAndEffectiveSource(effectiveSource, value.get()));
                             }
-                        } else {
-                            return Optional.of(new ValueAndEffectiveSource(effectiveSource, sourceValue.get()));
                         }
                     }
+
+                    Optional<Field> sourceField = getSourceField(sourceClass, sourceFieldName);
+                    if (sourceField.isPresent()) {
+                        final Field sf = sourceField.get();
+                        Optional<Object> sourceValue = getSourceValue(o, sf, effectiveSource.path());
+                        if (sourceValue.isPresent()) {
+                            if (subJson) {
+                                Optional<Object> sourceJsonValue = JsonUtil.getSourceJsonValue(effectiveSource, o, sf, destinationField);
+                                if (sourceJsonValue.isPresent()) {
+                                    return sourceJsonValue.map(jval -> new ValueAndEffectiveSource(effectiveSource, jval));
+                                }
+                            } else {
+                                return Optional.of(new ValueAndEffectiveSource(effectiveSource, sourceValue.get()));
+                            }
+                        }
+                    }
+                    return Optional.empty();
                 }
-            }
-            return Optional.empty();
-        });
+            }).toList();
 
     }
 
-    private final Map<Class<?>, Map<Field, Map<Class<?>, TriConsumer<EffectiveSource, Object, Object>>>> SETTER_CACHE = new ConcurrentHashMap<>();
+    private final Map<Class<?>, Map<Field, Map<Class<?>, TriFunction<EffectiveSource, Object, Object, Optional<Object>>>>> SETTER_CACHE = new ConcurrentHashMap<>();
 
     /**
      * Returns a BiConsumer, that for a certain {@code destinationField} consumes a destination object, and sets a value
      * for the given field.
      * @param destinationField The field to set
      * @param sourceClass The currently matched class of the source object
+     * @return A {@link TriConsumer} (effective source, destination object, new value) that can set the actual value in the destination
      */
-    private  TriConsumer<EffectiveSource, Object, Object> destinationSetter(Class<?> destinationClass, Field destinationField, Class<?> sourceClass) {
-        Map<Field, Map<Class<?>, TriConsumer<EffectiveSource, Object, Object>>> classCache = SETTER_CACHE.computeIfAbsent(destinationClass, fi -> new ConcurrentHashMap<>());
-        Map<Class<?>, TriConsumer<EffectiveSource, Object, Object>> cache = classCache.computeIfAbsent(destinationField, fi -> new ConcurrentHashMap<>());
-        return cache.computeIfAbsent(sourceClass, c -> _destinationSetter(destinationClass, destinationField, c));
+    private  TriFunction<EffectiveSource, Object, Object, Optional<Object>> destinationValueGetter(Class<?> destinationClass, Field destinationField, Class<?> sourceClass) {
+        Map<Field, Map<Class<?>, TriFunction<EffectiveSource, Object, Object, Optional<Object>>>> classCache = SETTER_CACHE.computeIfAbsent(destinationClass, fi -> new ConcurrentHashMap<>());
+        Map<Class<?>, TriFunction<EffectiveSource, Object, Object, Optional<Object>>> cache = classCache.computeIfAbsent(destinationField, fi -> new ConcurrentHashMap<>());
+
+        return cache.computeIfAbsent(sourceClass, c -> _destinationValueGetter(destinationClass, destinationField, c));
     }
 
     /**
      * Uncached version of {@link #destinationSetter(Class, Field, Class)}
      */
-    private TriConsumer<EffectiveSource, Object, Object> _destinationSetter(Class<?> destinationClass, Field destinationField, Class<?> sourceClass) {
+    private TriFunction<EffectiveSource, Object, Object, Optional<Object>> _destinationValueGetter(Class<?> destinationClass, Field destinationField, Class<?> sourceClass) {
         List<EffectiveSource> annotation = getAnnotation(sourceClass, destinationClass, destinationField);
 
         if (isJson(sourceClass)) {
             destinationField.setAccessible(true);
             return (effectiveSource, destination, o) -> {
                 try {
-                    MappedField f = MappedField.of(destinationField, annotation);
-                    destinationField.set(destination, mapLeaf(f, effectiveSource, o));
+                    MappedField f = MappedField.of(destinationField, effectiveSource);
+                    return mapLeaf(f, effectiveSource, o);
                 } catch (Exception e) {
                     log.warn("When setting {} in {}: {}", o, destinationField, e.getMessage());
+                    return Optional.empty();
                 }
             };
-        }
-        String sourceFieldName = UNSET;
-        for (EffectiveSource es :  annotation) {
-            if (! es.field().equals(UNSET)) {
-                sourceFieldName =  es.field();
-            } else {
-                //if (sour)
-            }
-        }
-        if (UNSET.equals(sourceFieldName)) {
-            sourceFieldName = destinationField.getName();
-        }
-        Optional<Field> sourceField = getSourceField(sourceClass, sourceFieldName);
-        if (sourceField.isPresent()) {
+        } else {
+
             destinationField.setAccessible(true);
             return (effectiveSource, destination, o) -> {
                 try {
-                    MappedField f = MappedField.of(destinationField, annotation);
-                    Object convertedValue = mapLeaf(f, effectiveSource, o);
-                    destinationField.set(destination, convertedValue);
+                    MappedField f = MappedField.of(destinationField, effectiveSource);
+                    return mapLeaf(f, effectiveSource, o);
+
                 } catch (Exception e) {
                     log.warn("When setting '{}' in {}: {} (because {})", o, destinationField, e.getMessage(), annotation);
+                    return Optional.empty();
                 }
             };
         }
-        return Consumers.triNop();
-    }
-
-
-    public Object mapLeaf(MappedField destinationField, EffectiveSource effectiveSource, Object o) {
-
-        for (LeafMapper lm : effectiveSource.leafMappers()) {
-            LeafMapper.Leaf result = lm.map(this, effectiveSource, destinationField, o);
-            if (result.success()) {
-                o = result.result();
-                if (result.terminate()) {
-                    return o;
-                }
-            }
-        }
-        for (LeafMapper leafMapper : leafMappers) {
-            LeafMapper.Leaf result = leafMapper.map(this, effectiveSource, destinationField, o);
-            if (result.success()) {
-                o = result.result();
-                if (result.terminate()) {
-                    break;
-                }
-            }
-        }
-        return o;
     }
 
 

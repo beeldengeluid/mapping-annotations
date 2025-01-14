@@ -14,11 +14,11 @@ import nl.beeldengeluid.mapping.*;
  */
 @Slf4j
 @EqualsAndHashCode
-public class UnwrapCollectionsMapper implements LeafMapper {
+public class UnwrapCollectionsLeafMapper implements LeafMapper {
 
-    public static final UnwrapCollectionsMapper INSTANCE = new UnwrapCollectionsMapper();
+    public static final UnwrapCollectionsLeafMapper INSTANCE = new UnwrapCollectionsLeafMapper();
 
-    private UnwrapCollectionsMapper() {
+    private UnwrapCollectionsLeafMapper() {
         // singleton
     }
 
@@ -34,9 +34,9 @@ public class UnwrapCollectionsMapper implements LeafMapper {
                                 try {
                                     var m = new MappedFieldImpl(destinationField.name(),
                                         genericClass,
-                                        List.of(effectiveSource)
+                                        effectiveSource
                                     );
-                                    Object mapped = mapper.mapLeaf(m, effectiveSource, o);
+                                    Object mapped = mapper.mapLeaf(m, effectiveSource, o).orElse(o);
                                     return mapped;
                                 } catch (MapException me) {
                                     log.warn(me.getMessage(), me);

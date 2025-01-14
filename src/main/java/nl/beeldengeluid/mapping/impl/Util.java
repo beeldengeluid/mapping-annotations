@@ -46,8 +46,13 @@ public class Util {
         List<EffectiveSource> list = new ArrayList<>();
         for (Source annotation : getAllSourceAnnotations(destinationField)) {
             EffectiveSource proposal =  EffectiveSource.of(annotation, defaultValues);
+            if (proposal.field().equals(UNSET)) {
+                log.info("No source field set for {} {}. May default to {}", destinationField, proposal, destinationField.getName());
+            }
             if (matches(proposal, sourceClass, destinationField.getName())) {
-                list.add(proposal);;
+                list.add(proposal);
+            } else {
+                log.debug("Not matching {}", proposal);
             }
         }
 
@@ -156,7 +161,7 @@ public class Util {
                   }
               }
               return Optional.ofNullable(value);
-          } catch (IllegalAccessException | NoSuchFieldException e) {
+          } catch (IllegalAccessException | NoSuchFieldException  | IllegalArgumentException e) {
               log.warn(e.getMessage());
               return Optional.empty();
           }
