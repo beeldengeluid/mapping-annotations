@@ -10,6 +10,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -199,8 +200,17 @@ public class Mapper {
     public <S, D> Mapper withLeafMapper(Class<S> source, Class<D> destination, Function<S, D> function) {
         return withLeafMapper(new SimpleLeafMapper<>(source, destination) {
             @Override
-            protected D map(S source) {
+            protected D map(EffectiveSource effectiveSource, S source) {
                 return function.apply(source);
+            }
+        });
+    }
+
+    public <S, D> Mapper withLeafMapper(Class<S> source, Class<D> destination, BiFunction<EffectiveSource, S, D> function) {
+        return withLeafMapper(new SimpleLeafMapper<>(source, destination) {
+            @Override
+            protected D map(EffectiveSource effectiveSource, S source) {
+                return function.apply(effectiveSource, source);
             }
         });
     }

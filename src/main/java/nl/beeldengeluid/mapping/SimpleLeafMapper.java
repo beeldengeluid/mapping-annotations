@@ -22,10 +22,10 @@ public abstract  class SimpleLeafMapper<S, D> implements LeafMapper {
     @Override
     public Leaf map(Mapper mapper, EffectiveSource effectiveSource, MappedField destinationField, Object o) {
         if (destination.isAssignableFrom(destinationField.type()) && source.isInstance(o)) {
-            return LeafMapper.mapped(map((S) o));
+            return LeafMapper.mapped(map(effectiveSource, (S) o));
         }
         return LeafMapper.NOT_MAPPED;
     }
 
-    protected abstract D map(S source);
+    protected abstract D map(EffectiveSource effectiveSource, S source);
 }
