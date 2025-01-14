@@ -101,7 +101,7 @@ public class JsonUtil {
     private static JsonNode getByJsonPath(JsonNode jn, String jsonPath) {
         try {
             return JsonPath.using(JSONPATH_CONFIGURATION).parse(jn).read(JSONPATH_CACHE.computeIfAbsent(jsonPath,
-                JsonPath::compile));
+                JsonPath::compile), JsonNode.class);
         } catch (PathNotFoundException pathNotFoundException) {
             log.debug(pathNotFoundException.getMessage());
             return MAPPER.nullNode();
