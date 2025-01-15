@@ -13,7 +13,7 @@ import nl.beeldengeluid.mapping.*;
 
 /**
  * If the leaf is a String, but must be mapped to an enum, this {@link LeafMapper} can (try to) arrange it.
- * Basically it will just must on {@link Enum#name()}  (as {@link Enum#valueOf(Class, String)}), but if {@link #considerXmlEnum}
+ * Basically it will just match on {@link Enum#name()}  (as {@link Enum#valueOf(Class, String)}), but if {@link #considerXmlEnum}
  * then it will consider the {@link XmlEnumValue} first.
  */
 @Getter

@@ -3,7 +3,7 @@ package nl.beeldengeluid.mapping.impl;
 import nl.beeldengeluid.mapping.*;
 
 /**
- * A leaf mapper that actually calls {@link Mapper} again on the leaf.
+ * A leaf mapper that actually calls the {@link Mapper} again on the leaf.
  */
 public class RecursiveLeafMapper implements LeafMapper {
 

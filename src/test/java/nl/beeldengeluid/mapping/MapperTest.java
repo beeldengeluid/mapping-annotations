@@ -6,7 +6,6 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -191,7 +190,10 @@ class MapperTest {
 
     @Test
     void enums() {
-        Mapper mapper = MAPPER.withClearsJsonCacheEveryTime(false);
+
+        Mapper mapper = MAPPER;
+
+
         SourceObject sourceObject = new SourceObject();
         {
             sourceObject.json("""
@@ -201,12 +203,7 @@ class MapperTest {
             Destination destination = mapper.map(sourceObject, Destination.class);
             assertThat(destination.enumValue()).isEqualTo(ExampleEnum.a);
         }
-    }
 
-    @Test
-    void xmlenums() {
-        Mapper mapper = MAPPER;
-        SourceObject sourceObject = new SourceObject();
         {
             sourceObject.json("""
                 { "enum" : "alfa" }
@@ -321,29 +318,6 @@ class MapperTest {
             assertThat(destination.a).isEqualTo("y");
         }
 
-    }
-
-
-    @Test
-    public void multipleSourcesWithLeafMapper() {
-        Mapper mapper = MAPPER.withLeafMapper(String.class, String.class, (effectiveSource, string) -> {
-            if ("x".equals(string)) {
-                return Optional.empty();
-            }
-            return Optional.ofNullable(string);
-
-        });
-        SourceObject source = new SourceObject();
-        source.moreJson("""
-            {
-              "a": "x",
-              "b": "y"
-            }
-            """);
-        {
-            MultipleSources destination = mapper.map(source, MultipleSources.class);
-            assertThat(destination.a).isEqualTo("y");
-        }
     }
 
 

@@ -13,7 +13,7 @@ import nl.beeldengeluid.mapping.*;
 
 /**
  * Consider {@link XmlJavaTypeAdapter} annotations when mapping leaf values. This is e.g. useful if the destination class is mappable to XML
- * and has some custom mapping at a leaf, then this can just be profited from with this.
+ * and has some custom mapping at a leaf, then that can just be profited from with this.
  */
 @Slf4j
 public class JaxbLeafMapper implements LeafMapper {

@@ -47,7 +47,7 @@ public class Util {
         for (Source annotation : getAllSourceAnnotations(destinationField)) {
             EffectiveSource proposal =  EffectiveSource.of(annotation, defaultValues);
             if (proposal.field().equals(UNSET)) {
-                log.info("No source field set for {} {}. May default to {}", destinationField, proposal, destinationField.getName());
+                log.debug("No source field set for {} {}. May default to {}", destinationField, proposal, destinationField.getName());
             }
             if (matches(proposal, sourceClass, destinationField.getName())) {
                 list.add(proposal);

@@ -1,8 +1,7 @@
 package nl.beeldengeluid.mapping.destinations;
 
 import io.github.threetenjaxb.core.LocalDateXmlAdapter;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -23,6 +22,7 @@ import nl.beeldengeluid.mapping.sources.SourceObject;
  */
 @Getter
 @Setter
+@ToString
 public class Destination {
 
     public Destination() {

@@ -3,13 +3,17 @@
  */
 package nl.beeldengeluid.mapping.annotations;
 
-import nl.beeldengeluid.mapping.LeafMapper;
-
 import java.lang.annotation.*;
+
+import nl.beeldengeluid.mapping.LeafMapper;
+import nl.beeldengeluid.mapping.Mapper;
 
 /**
  * This annotation can be put on a field of some destination object, to indicate
- * from which other object's field it must come.
+ * from which other object's field it must come. It can also be used at {@code class} level, in which case
+ * its values serve as <em>default</em> values for the {@code Source} annotations on its fields.
+ * <p>
+ * Multiple of these annotation can be used together, in which case the best one for the situation will be used.
  *
  * @author Michiel Meeuwissen
  * @since 0.1
@@ -20,6 +24,10 @@ import java.lang.annotation.*;
 @Repeatable(Sources.class)
 public @interface Source {
 
+    /**
+     * The default value for all {@link String} valued properties of this {@code @interface}.
+     * This can be used to check whether a certain property was explicitly set or not.
+     */
     String UNSET = "#UNSET";
 
     /**
@@ -65,6 +73,9 @@ public @interface Source {
      */
     String[] path() default {};
 
+    /**
+     * @see Mapper#leafMappers()
+     */
     Class<? extends LeafMapper>[] leafMappers() default {};
 
 

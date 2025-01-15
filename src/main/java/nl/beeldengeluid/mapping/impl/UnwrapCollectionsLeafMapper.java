@@ -4,7 +4,10 @@ import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import nl.beeldengeluid.mapping.*;
 
@@ -22,29 +25,34 @@ public class UnwrapCollectionsLeafMapper implements LeafMapper {
         // singleton
     }
 
+    protected Collector<Object, ?, ?> getCollector(MappedField field) {
+         if (field.type() == List.class) {
+             return Collectors.toList();
+         } else {
+             throw new UnsupportedOperationException("UnwrapCollectionsLeafMapper does (yet) not support collections of type " + field.type());
+         }
+    }
+
     @Override
     public Leaf map(Mapper mapper, EffectiveSource effectiveSource, MappedField destinationField, Object possiblyACollection) {
-        if (possiblyACollection instanceof Collection<?> list) {
-            if (destinationField.type() == List.class) {
-                ParameterizedType genericType = (ParameterizedType) destinationField.genericType();
-                Class<?> genericClass = (Class<?>) genericType.getActualTypeArguments()[0];
-                if (genericClass != Object.class) {
-                    return LeafMapper.mapped(list.stream()
-                        .map(o -> {
-                                try {
-                                    var m = new MappedFieldImpl(destinationField.name(),
-                                        genericClass,
-                                        effectiveSource
-                                    );
-                                    Object mapped = mapper.mapLeaf(m, effectiveSource, o).orElse(o);
-                                    return mapped;
-                                } catch (MapException me) {
-                                    log.warn(me.getMessage(), me);
-                                    return null;
-                                }
+        if (possiblyACollection instanceof Collection<?> collection) {
+            ParameterizedType genericType = (ParameterizedType) destinationField.genericType();
+            Class<?> genericClass = (Class<?>) genericType.getActualTypeArguments()[0];
+            if (genericClass != Object.class) {
+                return LeafMapper.mapped(collection.stream()
+                    .map(o -> {
+                            try {
+                                var m = new MappedFieldImpl(destinationField.name(),
+                                    genericClass,
+                                    effectiveSource
+                                );
+                                return mapper.mapLeaf(m, effectiveSource, o).orElse(o);
+                            } catch (MapException me) {
+                                log.warn(me.getMessage(), me);
+                                return LeafMapper.NOT_MAPPED;
                             }
-                        ).toList());
-                }
+                        }
+                    ).collect(getCollector(destinationField)));
             }
 
         }

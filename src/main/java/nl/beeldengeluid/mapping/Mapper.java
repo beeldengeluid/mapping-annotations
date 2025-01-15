@@ -47,7 +47,7 @@ public class Mapper {
 
 
     /**
-     * The leaf mappers of this Mapper. An unmodifiable and sorted list of them.
+     * The {@link LeafMapper leaf mappers} of this Mapper. An unmodifiable and sorted list of them.
      *
      */
     @With(AccessLevel.PACKAGE)
