@@ -8,7 +8,7 @@ import nl.beeldengeluid.mapping.annotations.Source;
 
 
 /**
- * {@code Source} annotations can be on class and on field level. This 'EffectiveSource' contains the effective value of all attributes.
+ * {@code Source} annotations can be used on class and on field level. This 'EffectiveSource' contains the effective value of all attributes.
  *
  * @param sourceClass See {@link Source#sourceClass()}
  * @param jsonPath See {@link Source#jsonPath()}

@@ -1,13 +1,9 @@
 package nl.beeldengeluid.mapping.impl;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
 import java.lang.reflect.Field;
 
 import jakarta.xml.bind.annotation.XmlEnumValue;
 
-import nl.beeldengeluid.mapping.LeafMapper;
 import nl.beeldengeluid.mapping.*;
 
 
@@ -16,24 +12,13 @@ import nl.beeldengeluid.mapping.*;
  * Basically it will just match on {@link Enum#name()}  (as {@link Enum#valueOf(Class, String)}), but if {@link #considerXmlEnum}
  * then it will consider the {@link XmlEnumValue} first.
  */
-@Getter
-@EqualsAndHashCode
-public class EnumLeafMapper implements LeafMapper {
+public record EnumLeafMapper(boolean considerXmlEnum, boolean caseSensitive) implements LeafMapper {
 
-
-    private final boolean considerXmlEnum;
-    private final boolean caseSensitive;
-
-
-    public EnumLeafMapper(boolean considerXmlEnum, boolean caseSensitive) {
-        this.considerXmlEnum = considerXmlEnum;
-        this.caseSensitive = caseSensitive;
-    }
 
     @Override
     public Leaf map(Mapper mapper, EffectiveSource effectiveSource, MappedField destinationField, Object o) {
 
-        if (destinationField.genericType() instanceof  Class<?> c && c.isEnum() && o instanceof String string) {
+        if (destinationField.genericType() instanceof Class<?> c && c.isEnum() && o instanceof String string) {
             Class<Enum<?>> enumClass = (Class<Enum<?>>) c;
             if (considerXmlEnum) {
                 for (Enum<?> enumConstant : enumClass.getEnumConstants()) {

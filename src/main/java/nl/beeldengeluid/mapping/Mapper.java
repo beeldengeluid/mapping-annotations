@@ -185,10 +185,10 @@ public class Mapper {
      * @param <D> The destination type
      * @see #withLeafMapper(LeafMapper)
      */
-    public <S, D> Mapper withLeafMapper(Class<S> source, Class<D> destination, Function<S, Optional<D>> function) {
-        return withLeafMapper(new SimpleLeafMapper<>(source, destination) {
+    public <S, D> Mapper withLeafMapper(Class<S> source, Class<D> destination, Function<S, D> function) {
+        return withLeafMapper(new SimplerLeafMapper<>(source, destination) {
             @Override
-            protected Optional<D> map(EffectiveSource effectiveSource, S source) {
+            protected D map(S source) {
                 return function.apply(source);
             }
         });

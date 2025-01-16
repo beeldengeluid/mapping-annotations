@@ -2,8 +2,6 @@ package nl.beeldengeluid.mapping;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.List;
-import java.util.Optional;
 
 import nl.beeldengeluid.mapping.impl.ReflectMappedField;
 

@@ -1,7 +1,5 @@
 package nl.beeldengeluid.mapping;
 
-import java.util.List;
-
 /**
  * At the end of the mapping process, the actual found value can be mapped. All kind of strategies can be though of. That's why it is pluggable.
  */

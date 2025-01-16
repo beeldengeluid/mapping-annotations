@@ -93,7 +93,7 @@ public class JsonUtil {
     }
 
     // jsonpath would have its own cache, but it may be used by other
-    // stuff. Since we know that there is a limited number of JsonPath object caused by us, we just use our hown cache, without any limitations.
+    // stuff. Since we know that there is a limited number of JsonPath object caused by us, we just use our own cache, without any limitations.
     private static final Map<String, JsonPath> JSONPATH_CACHE = new ConcurrentHashMap<>();
 
     private static Optional<Object> getSourceJsonValueByPath(Object source, Field sourceField, List<String> path, String jsonPath) {

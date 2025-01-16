@@ -2,7 +2,6 @@ package nl.beeldengeluid.mapping;
 
 import lombok.extern.log4j.Log4j2;
 
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -124,17 +123,14 @@ class MapperTest {
     void customMapping() {
 
 
-        Mapper mapper = MAPPER.withLeafMapper((m,  s, field, value) -> {
-                if (value instanceof JsonNode json && field.genericType().equals(SubDestination.class)) {
-                    Field f;
-                    SubDestination so = new SubDestination();
-                    so.a(json.get("title").asText() + "/" + json.get("description").asText());
-                    return LeafMapper.mapped(so);
-                } else {
-                    return LeafMapper.NOT_MAPPED;
-                }
+        Mapper mapper = MAPPER.withLeafMapper(new SimplerLeafMapper<>(JsonNode.class, SubDestination.class) {
+            @Override
+            protected SubDestination map(JsonNode json) {
+                SubDestination so = new SubDestination();
+                so.a(json.get("title").asText() + "/" + json.get("description").asText());
+                return so;
             }
-        );
+        });
 
         SourceObject sourceObject = new SourceObject();
         sourceObject.json("""

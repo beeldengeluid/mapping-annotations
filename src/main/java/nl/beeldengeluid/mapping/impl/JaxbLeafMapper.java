@@ -18,11 +18,15 @@ import nl.beeldengeluid.mapping.*;
 @Slf4j
 public class JaxbLeafMapper implements LeafMapper {
 
+    /**
+     * Cache for instantiated {@link XmlAdapter}s.
+     */
     private static final Map<MappedField, Optional<XmlAdapter<?, ?>>> ADAPTERS = new ConcurrentHashMap<>();
+
+    public static final JaxbLeafMapper INSTANCE = new JaxbLeafMapper();
 
     private JaxbLeafMapper() {}
 
-    public static final JaxbLeafMapper INSTANCE = new JaxbLeafMapper();
 
 
     private static Leaf considerXmlAdapter(Object o, MappedField destinationField)  {

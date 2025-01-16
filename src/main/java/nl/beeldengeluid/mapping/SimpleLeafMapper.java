@@ -2,8 +2,16 @@ package nl.beeldengeluid.mapping;
 
 import java.util.Optional;
 
-public abstract  class SimpleLeafMapper<S, D> implements LeafMapper {
 
+/**
+ * An abstract version of {@link LeafMapper} that just reduces the needed {@link #map(Mapper, EffectiveSource, MappedField, Object)} to a simpler
+ * {@link #map(EffectiveSource, Object)}
+ * <p>
+ * This is possible if during construction it is specified between what source and destination types this mapper can map.
+ * @param <S> the source type this mapper recognizes
+ * @param <D> the destination type this mapper recognizes
+ */
+public abstract class SimpleLeafMapper<S, D> implements LeafMapper {
 
     private final Class<S> source;
     private final Class<D> destination;
