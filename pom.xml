@@ -21,10 +21,10 @@
 
 
   <scm>
-    <connection>scm:git:${project.scm.url}.git</connection>
-    <developerConnection>scm:git:${project.scm.url}.git</developerConnection>
+    <connection>scm:git:git@github.com:beeldengeluid/mapping-annotations.git</connection>
+    <developerConnection>${project.scm.connection}</developerConnection>
     <url>https://github.com/beeldengeluid/mapping-annotations</url>
-    <tag>0.7</tag>
+    <tag>HEAD</tag>
   </scm>
 
 
@@ -58,7 +58,7 @@
         <artifactId>vpro-shared-bom</artifactId>
         <type>pom</type>
         <scope>import</scope>
-        <version>5.4.2</version>
+        <version>5.4.3-SNAPSHOT</version>
     </dependency>
     </dependencies>
   </dependencyManagement>
@@ -265,37 +265,39 @@
   </distributionManagement>
 
   <profiles>
-    <profile>
-      <id>deploy</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.13</version>
-            <extensions>true</extensions>
-            <configuration>
-              <serverId>ossrh</serverId>
-              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>true</autoReleaseAfterClose>
-            </configuration>
-          </plugin>
-         <!-- <plugin>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.2.7</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>-->
+    <!--
+  <profile>
+    <id>deploy</id>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <version>1.6.13</version>
+          <extensions>true</extensions>
+          <configuration>
+            <serverId>ossrh</serverId>
+            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+          </configuration>
+        </plugin>
+      <plugin>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>3.2.7</version>
+          <executions>
+            <execution>
+              <id>sign-artifacts</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>sign</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
         </plugins>
       </build>
     </profile>
+    -->
   </profiles>
 
 </project>
