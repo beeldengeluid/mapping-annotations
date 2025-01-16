@@ -128,27 +128,30 @@ public class JsonUtil {
         JSON_CACHE.get().clear();
     }
 
+    public static JsonNode getJson(Object json) {
+        Key k = new Key(json);
+        return  JSON_CACHE.get().computeIfAbsent(k, (key) -> {
+                try {
+                    if (json instanceof byte[] bytes) {
+                        return MAPPER.readTree(bytes);
+                    } else if (json instanceof String string) {
+                        return MAPPER.readTree(string);
+                    } else if (json instanceof JsonNode n) {
+                        return n;
+                    } else {
+                        throw new IllegalStateException("Could not be mapped to json %s -> %s".formatted(json, json));
+                    }
+                } catch (IOException e) {
+                    throw new IllegalStateException(e.getMessage(), e);
+                }
+            }
+        );
+    }
+
     static Optional<JsonNode> getSourceJsonValue(Object source, Field sourceField, List<String> path) {
 
         return Util.getSourceValue(source, sourceField, path)
-            .map(json -> {
-                Key k = new Key(json);
-                return  JSON_CACHE.get().computeIfAbsent(k, (key) -> {
-                    try {
-                        if (json instanceof byte[] bytes) {
-                            return MAPPER.readTree(bytes);
-                        } else if (json instanceof String string) {
-                            return MAPPER.readTree(string);
-                        } else if (json instanceof JsonNode n) {
-                            return n;
-                        } else {
-                            throw new IllegalStateException("%s could not be mapped to json %s -> %s".formatted(sourceField, json, json));
-                        }
-                    } catch (IOException e) {
-                        throw new IllegalStateException(e.getMessage(), e);
-                    }
-                });
-            });
+            .map(JsonUtil::getJson);
    }
 
 

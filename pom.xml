@@ -58,7 +58,7 @@
         <artifactId>vpro-shared-bom</artifactId>
         <type>pom</type>
         <scope>import</scope>
-        <version>5.4.3-SNAPSHOT</version>
+        <version>5.4.3</version>
     </dependency>
     </dependencies>
   </dependencyManagement>
@@ -265,11 +265,30 @@
   </distributionManagement>
 
   <profiles>
-    <!--
-  <profile>
-    <id>deploy</id>
-    <build>
-      <plugins>
+    <profile>
+      <id>deploy</id>
+      <properties>
+        <delombok.skip>false</delombok.skip>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.6.3</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <failOnError>false</failOnError>
+              <show>public</show>
+            </configuration>
+          </plugin>
+          <!--
         <plugin>
           <groupId>org.sonatype.plugins</groupId>
           <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -295,9 +314,12 @@
           </executions>
         </plugin>
         </plugins>
+        -->
+        </plugins>
       </build>
+
     </profile>
-    -->
+
   </profiles>
 
 </project>
