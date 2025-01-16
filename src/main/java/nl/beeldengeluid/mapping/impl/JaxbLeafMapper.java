@@ -41,7 +41,7 @@ public class JaxbLeafMapper implements LeafMapper {
                     XmlAdapter<?, ?> xmlAdapter = annotation.value().getDeclaredConstructor().newInstance();
                     return Optional.of(xmlAdapter);
                 } catch (Exception e) {
-                    log.warn(e.getMessage(), e);
+                    log.debug(e.getMessage(), e);
                 }
             }
             return Optional.empty();
@@ -51,10 +51,9 @@ public class JaxbLeafMapper implements LeafMapper {
                 //noinspection unchecked,rawtypes
                 return LeafMapper.mapped(((XmlAdapter) adapter.get()).unmarshal(o));
             } catch (Exception e) {
-                log.warn(e.getMessage());
+                // there may be another leafmapper fixing this.
+                log.debug("For {}: {}", o, e.getMessage());
             }
-        } else {
-
         }
         return NOT_MAPPED;
     }
