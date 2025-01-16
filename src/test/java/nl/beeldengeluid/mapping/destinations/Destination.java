@@ -69,4 +69,8 @@ public class Destination {
     @Source(field ="moreJson", jsonPath = "subObject")
     SubObject subObject;
 
+
+    @CustomAnnotation
+    String withCustomLeafMapperAndAnnotation;
+
 }

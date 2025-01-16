@@ -82,12 +82,12 @@ class MapperTest {
        assertThat(MAPPER.getMappedDestinationProperties(
            ExtendedSourceObject.class,
            Destination.class
-       ).keySet()).containsExactlyInAnyOrder("title", "description", "moreJson", "id", "list", "list2", "sub", "subs", "enumValue", "localDate", "duration", "subObject");
+       ).keySet()).containsExactlyInAnyOrder("title", "description", "moreJson", "id", "list", "list2", "sub", "subs", "enumValue", "localDate", "duration", "subObject", "withCustomLeafMapperAndAnnotation");
 
        assertThat(MAPPER.getMappedDestinationProperties(
            SourceObject.class,
            Destination.class
-       ).keySet()).containsExactlyInAnyOrder("title", "description", "moreJson", "list", "list2", "sub", "subs", "enumValue", "localDate", "duration", "subObject");
+       ).keySet()).containsExactlyInAnyOrder("title", "description", "moreJson", "list", "list2", "sub", "subs", "enumValue", "localDate", "duration", "subObject", "withCustomLeafMapperAndAnnotation");
    }
 
     @Test
@@ -313,7 +313,18 @@ class MapperTest {
             MultipleSources destination = MAPPER.map(source, MultipleSources.class);
             assertThat(destination.a).isEqualTo("y");
         }
+    }
 
+    @Test
+    public void customMappingWithAnnotationAndLeafMapper() {
+        SourceObject source = new SourceObject();
+        source.json("""
+          {
+            "custom": "foobar"
+          }
+          """.getBytes());
+        Destination destination = MAPPER.map(source, Destination.class);
+        assertThat(destination.withCustomLeafMapperAndAnnotation()).isEqualTo("{{foobar}}");
     }
 
 

@@ -5,6 +5,7 @@ package nl.beeldengeluid.mapping.impl;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,19 +60,25 @@ public class Util {
         return Collections.unmodifiableList(list);
     }
 
-    public static List<Source> getAllSourceAnnotations(AnnotatedElement destField) {
-        Sources sources = destField.getAnnotation(Sources.class);
-        if (sources != null) {
-            return List.of(sources.value());
-        }
-        Source source = destField.getAnnotation(Source.class);
-        if (source == null) {
-            return List.of();
-        } else {
-            return List.of(source);
-        }
-
+    private static List<Source> getAllSourceAnnotations(AnnotatedElement element) {
+        List<Source> result = new ArrayList<>();
+        getAllSourceAnnotations(element, new HashSet<>(), result);
+        return result;
     }
+    private static void getAllSourceAnnotations(AnnotatedElement element, Set<AnnotatedElement> delt, List<Source> result) {
+        if (delt.add(element)) {
+            for (Annotation annotation : element.getAnnotations()) {
+                if (annotation instanceof  Source s) {
+                    result.add(s);
+                } else if (annotation instanceof  Sources sources) {
+                    result.addAll(Arrays.asList(sources.value()));
+                } else {
+                    getAllSourceAnnotations(annotation.annotationType(), delt, result);
+                }
+            }
+        }
+    }
+
 
     private static Optional<Field> associatedBuilderField(Field f) {
         if (f != null && f.getAnnotations().length == 0) {
