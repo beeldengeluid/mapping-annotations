@@ -6,28 +6,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import nl.beeldengeluid.mapping.*;
 
-public class CustomLeafMapper implements LeafMapper {
+public class CustomLeafMapper extends SimplerLeafMapper<JsonNode, String> {
 
     public static final CustomLeafMapper INSTANCE = new CustomLeafMapper();
 
     protected CustomLeafMapper() {
-            }
-
-    @Override
-    public Leaf map(Mapper mapper, EffectiveSource effectiveSource, MappedField destinationField, Object o) {
-
-        if (o instanceof JsonNode n) {
-            Optional<String> m = map(effectiveSource, n);
-            if (m.isPresent()) {
-                return LeafMapper.mapped(m.get());
-            }
-        }
-        return NOT_MAPPED;
-
+        super(JsonNode.class, String.class);
     }
 
-    //@Override
-    protected Optional<String> map(EffectiveSource effectiveSource, JsonNode source) {
-        return Optional.ofNullable(source.get("custom")).map(c -> "{{" + c.textValue() + "}}");
+    @Override
+    protected String map(JsonNode source) {
+        return Optional.ofNullable(source.get("custom")).map(c -> "{{" + c.textValue() + "}}").orElse(null);
     }
 }

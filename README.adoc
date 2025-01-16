@@ -177,7 +177,57 @@ Mapper mapper = MAPPER.withLeafMapper(Double.class, Duration.class, (doub) -> Du
 }
 ----
 
+=== On the annotation
 
+Sometimes it's handyest to just specificy the last part of the mapping explicitely on the field itself:
+
+[source, java]
+----
+@Source(leafMappers = CustomLeafMapper.class, field = "json", sourceClass=SomeClass.class, jsonPointer = "")
+String myfield;
+----
+
+So, using `sourceClass` and `field` makes the mapper look at the 'json' field of an instance of 'SomeClass'. The `jsonPointer` then points to the entire object, which effectively converts it to a `JsonNode` if it isn't (it is e.g. `String`). This defines then a 'leaf' of type `JsonNode`, and that can be further processes with the given CustomLeafMapper which may e.g. look like this:
+
+[source, java]
+----
+public class CustomLeafMapper extends SimplerLeafMapper<JsonNode, String> {
+
+    public static final CustomLeafMapper INSTANCE = new CustomLeafMapper();
+
+    protected CustomLeafMapper() {
+        super(JsonNode.class, String.class);
+    }
+
+    @Override
+    protected String map(JsonNode source) {
+        return Optional.ofNullable(source.get("custom")).map(c -> "{{" + c.textValue() + "}}").orElse(null);
+    }
+}
+----
+
+
+
+== Custom annotations
+
+Rather than annotating the fields or classes directly you can also annotate a custom annotation, and use _that_ to annotate them. This facilitates reuse of combination. E.g.
+
+[source,java]
+----
+import java.lang.annotation.Retention;import java.lang.annotation.RetentionPolicy;import nl.beeldengeluid.mapping.annotations.Source;
+@Source(field = "payload", jsonPointer = "", leafMappers = GtaaLinkMapper.class)
+@Retention(RetentionPolicy.RUNTIME)
+@interface GtaaLink {
+
+}
+----
+
+[source, java]
+----
+
+@GtaaLink
+URI gtaaLink;
+----
 
 
 == Performance
