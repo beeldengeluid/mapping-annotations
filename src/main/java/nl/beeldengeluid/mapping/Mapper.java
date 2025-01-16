@@ -185,7 +185,7 @@ public class Mapper {
      * @param <D> The destination type
      * @see #withLeafMapper(LeafMapper)
      */
-    public <S, D> Mapper withLeafMapper(Class<S> source, Class<D> destination, Function<S, D> function) {
+    public <S, D> Mapper withSimplerLeafMapper(Class<S> source, Class<D> destination, Function<S, D> function) {
         return withLeafMapper(new SimplerLeafMapper<>(source, destination) {
             @Override
             protected D map(S source) {
@@ -193,6 +193,26 @@ public class Mapper {
             }
         });
     }
+
+    /**
+     * Specify a leaf mapper with a {@link Function} while mapping source and destination on type.
+     * @param source Type of the source object
+     * @param destination Type of the destination object
+     * @param function Function specifying how to map source to destination
+     * @return A new {@link Mapper}
+     * @param <S> The source type
+     * @param <D> The destination type
+     * @see #withLeafMapper(LeafMapper)
+     */
+    public <S, D> Mapper withLeafMapper(Class<S> source, Class<D> destination, Function<S, Optional<D>> function) {
+        return withLeafMapper(new SimpleLeafMapper<>(source, destination) {
+            @Override
+            protected Optional<D> map(EffectiveSource effectiveSource, S source) {
+                return function.apply(source);
+            }
+        });
+    }
+
 
     public <S, D> Mapper withLeafMapper(Class<S> source, Class<D> destination, BiFunction<EffectiveSource, S, Optional<D>> function) {
         return withLeafMapper(new SimpleLeafMapper<>(source, destination) {
