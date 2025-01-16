@@ -12,5 +12,7 @@ module nl.beeldengeluid.mapping.annotations {
     requires org.meeuw.functional;
 
     exports nl.beeldengeluid.mapping.annotations;
+    exports nl.beeldengeluid.mapping.bind;
     exports nl.beeldengeluid.mapping;
+
 }

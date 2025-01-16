@@ -74,6 +74,9 @@ public @interface Source {
     String[] path() default {};
 
     /**
+     * The leaf mapper specific for the destination this {@code Source} annotation is on.
+     * There may be more, which will then be call subsequently (e.g. {@link nl.beeldengeluid.mapping.impl.JsonLeafMapper first convert to json}, then pick a value from it)
+     *
      * @see Mapper#leafMappers()
      */
     Class<? extends LeafMapper>[] leafMappers() default {};

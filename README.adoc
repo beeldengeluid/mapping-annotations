@@ -25,7 +25,7 @@ import org.beeldengeluid.mapping.annotations.Source;
 ..
 class DestinationObject {
 
-   @Source // This field is sourced by a field with the same name in souce objects
+   @Source // This field is sourced by a field with the same name in source objects
    String title;
 
    @Source(field = "_name") // This field is sourced by a field with the '_name' in source objects
@@ -40,7 +40,6 @@ All fields annotated like so can be filled like this:
 
 [source,java]
 ----
-
 ...
 
 DestinationObject destination; SourceObject sourceObject;
@@ -156,7 +155,7 @@ For all fields in this class with `@Source` annotations the default value of the
 Sometimes it's not feasible to map a subobject entirely by just adding annotations in the destination type.
 
 E.g. a 'json' payload can be easily pointed to, but automatic unmapping of this is not feasible. Several approaches could be followed, but the final fall back can always be to just
-program the last steps ('the leaf') by implementing the (functional) interface `nl.beeldengeluid.mapping.LeafMapper.
+program the last steps ('the leaf') by implementing the (functional) interface `nl.beeldengeluid.mapping.LeafMapper` (or extending one of it's abstract implementations)
 
 In other words, the end of the route to the value ('the leaf') may be a type that does not correspond yet to type of the field where it should be stored in.
 
@@ -179,7 +178,7 @@ Mapper mapper = MAPPER.withLeafMapper(Double.class, Duration.class, (doub) -> Du
 
 === On the annotation
 
-Sometimes it's handyest to just specificy the last part of the mapping explicitely on the field itself:
+Sometimes it's handiest to just specificy the last part of the mapping explicitely on the field itself:
 
 [source, java]
 ----

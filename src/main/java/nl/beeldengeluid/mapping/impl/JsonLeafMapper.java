@@ -7,7 +7,9 @@ import nl.beeldengeluid.mapping.*;
 
 
 /**
- *
+ * This can be used on a leaf that is not a {@link com.fasterxml.jackson.databind.JsonNode} by itself, but easily convertible to it. E.g. a {@code String} containing json.
+ * <p>
+ * This can also be done by adding {@code jsonPointer=""} to the {@code Source} annotation.
  */
 @Getter
 @EqualsAndHashCode
