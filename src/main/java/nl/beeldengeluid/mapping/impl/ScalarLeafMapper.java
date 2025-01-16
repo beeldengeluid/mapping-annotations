@@ -3,6 +3,7 @@ package nl.beeldengeluid.mapping.impl;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import java.net.URI;
 import java.time.Instant;
 import java.time.LocalDate;
 
@@ -53,6 +54,10 @@ public class ScalarLeafMapper implements LeafMapper {
         } else if (type.isAssignableFrom(LocalDate.class)) {
             if (o instanceof CharSequence string) {
                 return mapped(LocalDate.parse(o.toString()));
+            }
+        } else if (type.isAssignableFrom(URI.class)) {
+            if (o instanceof CharSequence string) {
+                return mapped(URI.create(string.toString()));
             }
         }
         return LeafMapper.NOT_MAPPED;
